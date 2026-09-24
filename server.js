@@ -2725,8 +2725,14 @@ app.get('/api/products/full', authenticateToken, async (req, res) => {
 });
 
 app.post('/api/products', authenticateToken, async (req, res) => {
-    const { barcode, name, category, price, stock, cost_price, selling_unit, packaging_unit, conversion_rate, reorder_level, track_batch, track_expiry, batch_number, expiry_date } = req.body;
+    let { barcode, name, category, price, stock, cost_price, selling_unit, packaging_unit, conversion_rate, reorder_level, track_batch, track_expiry, batch_number, expiry_date } = req.body;
     try {
+        let finalBarcode = (barcode || '').toString().trim();
+        if (!finalBarcode) {
+            finalBarcode = 'LI' + Date.now().toString().slice(-6) + Math.floor(10 + Math.random() * 90);
+        }
+        barcode = finalBarcode;
+        selling_unit = selling_unit || 'Unit';
         // Refresh store info from DB to ensure accuracy
         const userRes = await pool.query('SELECT store_id, store_location FROM users WHERE id = $1', [req.user.id]);
         const dbUser = userRes.rows[0];
@@ -3044,8 +3050,7 @@ app.post('/api/products/bulk', authenticateToken, upload.single('file'), async (
 
                 // Final Barcode Resolution for new products
                 if (!existingProduct && !barcodeProvided) {
-                    const prefix = name.substring(0, 3).toUpperCase().replace(/[^A-Z]/g, 'X');
-                    barcode = `${prefix}-${Date.now().toString().slice(-6)}-${Math.floor(Math.random() * 1000)}`;
+                    barcode = 'LI' + Date.now().toString().slice(-6) + Math.floor(10 + Math.random() * 90);
                 } else if (!existingProduct && barcodeProvided) {
                     barcode = barcodeProvided;
                 }

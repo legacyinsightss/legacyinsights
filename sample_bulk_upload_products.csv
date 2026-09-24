@@ -1,11 +1,11 @@
-Barcode,Product Name,Category,Cost,Markup,Price,Current Stock,Selling Unit,Reorder Level
-LEG-00101,Portland Cement (50kg Bag),Building Materials,85,29%,110,200,Bag,50
-LEG-00102,High Tensile Steel Rod 12mm,Building Materials,60,30%,78,150,Piece,30
-LEG-00103,PVC Pressure Pipe 4 Inch (6m),Plumbing Supplies,45,44%,65,80,Length,20
-LEG-00104,Acrylic Emulsion Paint White (20L),Paints & Finishes,280,28%,360,40,Bucket,10
-LEG-00105,Claw Hammer 16oz Fiberglass,Tools & Hardware,35,48%,52,60,Piece,15
-LEG-00106,Angle Grinder 115mm 850W,Tools & Hardware,220,40%,310,25,Unit,5
-LEG-00107,2.5mm Twin & Earth Cable (100m),Electrical Supplies,320,34%,430,30,Roll,8
-LEG-00108,Drywall Screws 3.5x25mm (Box 1000),Fasteners & Fixings,28,50%,42,100,Box,25
-,Safety Hard Hat (Yellow),Safety & PPE,25,40%,35,50,Piece,12
-,Measuring Tape 8m / 26ft Heavy Duty,Tools & Hardware,22,45%,32,75,Piece,15
+Product Name,Category,Cost,Markup,Price,Current Stock,Reorder Level
+Portland Cement (50kg Bag),Building Materials,85,29%,110,200,50
+High Tensile Steel Rod 12mm,Building Materials,60,30%,78,150,30
+PVC Pressure Pipe 4 Inch (6m),Plumbing Supplies,45,44%,65,80,20
+Acrylic Emulsion Paint White (20L),Paints & Finishes,280,28%,360,40,10
+Claw Hammer 16oz Fiberglass,Tools & Hardware,35,48%,52,60,15
+Angle Grinder 115mm 850W,Tools & Hardware,220,40%,310,25,5
+2.5mm Twin & Earth Cable (100m),Electrical Supplies,320,34%,430,30,8
+Drywall Screws 3.5x25mm (Box 1000),Fasteners & Fixings,28,50%,42,100,25
+Safety Hard Hat (Yellow),Safety & PPE,25,40%,35,50,12
+Measuring Tape 8m / 26ft Heavy Duty,Tools & Hardware,22,45%,32,75,15
