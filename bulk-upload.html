@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="auth-guard.js"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bulk Product Upload</title>
+    <link rel="icon" type="image/png" href="logo.png">
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; padding: 40px; background: #f4f4f9; display: flex; justify-content: center; }
+        .container { width: 100%; max-width: 500px; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.1); }
+        h2 { color: #f59e0b; margin-top: 0; text-align: center; }
+        .description { color: #666; font-size: 14px; margin-bottom: 20px; text-align: center; }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; font-weight: 600; color: #333; }
+        input[type="file"] { width: 100%; padding: 12px; border: 2px dashed #ddd; border-radius: 8px; background: #fafafa; cursor: pointer; }
+        input[type="file"]:hover { border-color: #f59e0b; background: #f0f4ff; }
+        button { background: #f59e0b; color: #000000; font-weight: bold; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; width: 100%; font-size: 16px; font-weight: 600; transition: background 0.2s; }
+        button:hover { background: #2a3a7c; }
+        button:disabled { background: #ccc; cursor: not-allowed; }
+        #status { margin-top: 20px; padding: 15px; border-radius: 8px; display: none; font-size: 14px; line-height: 1.5; }
+        .success { background: #e8f5e9; color: #27ae60; border: 1px solid #c8e6c9; }
+        .error { background: #ffebee; color: #c62828; border: 1px solid #ffcdd2; }
+        .back-link { display: inline-flex; align-items: center; gap: 8px; color: #64748b; background: white; padding: 10px 20px; border-radius: 50px; text-decoration: none; font-size: 14px; font-weight: 600; margin-bottom: 20px; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 2px 10px rgba(0,0,0,0.05); border: none; }
+        .back-link:hover { color: var(--primary-color, #f59e0b); transform: translateX(-5px); box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+    </style>
+    <script src="currency.js"></script>
+    <script src="telemetry-guard.js"></script>
+    <script src="instant-nav.js"></script>
+    <link rel="stylesheet" href="sidebar.css">
+</head>
+<body>
+    <div class="container">
+        <h2>📦 Bulk Stock Upload</h2>
+        <p class="description">Upload an Excel file (.xlsx) with columns:<br><strong>Product Name, Category, Cost, Markup, Price, Current Stock, Batch Number, Expiry Date, Selling Unit, Packaging Unit, Items per Package, Reorder Level</strong></p>
+        
+        <div class="form-group">
+            <label>Select Excel File</label>
+            <input type="file" id="fileInput" accept=".xlsx, .xls, .csv">
+        </div>
+        
+        <button onclick="uploadFile()">Upload Products</button>
+        
+        <div id="status"></div>
+        <a href="/dashboard" class="back-link">← Back to Dashboard</a>
+    </div>
+
+    <script>
+        async function uploadFile() {
+            const fileInput = document.getElementById('fileInput');
+            const statusDiv = document.getElementById('status');
+            const btn = document.querySelector('button');
+            
+            if (!fileInput.files[0]) {
+                alert('Please select a file first');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+
+            btn.disabled = true;
+            btn.innerText = 'Uploading...';
+            statusDiv.style.display = 'none';
+
+            try {
+                const token = localStorage.getItem('authToken');
+                const res = await fetch('/api/products/bulk', {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` },
+                    body: formData
+                });
+
+                const data = await res.json();
+                
+                statusDiv.style.display = 'block';
+                if (data.success) {
+                    statusDiv.className = 'success';
+                    statusDiv.innerHTML = `<strong>✅ Upload Complete!</strong><br>Successfully Added: ${data.results.success}<br>Failed: ${data.results.failed}`;
+                    if (data.results.errors.length > 0) {
+                        const escapeHtml = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+                        statusDiv.innerHTML += '<br><br><strong>Errors:</strong><br>' + data.results.errors.map(escapeHtml).join('<br>');
+                    }
+                } else {
+                    statusDiv.className = 'error';
+                    statusDiv.innerText = '❌ ' + (data.message || 'Upload failed');
+                }
+            } catch (err) {
+                statusDiv.style.display = 'block';
+                statusDiv.className = 'error';
+                statusDiv.innerText = '❌ System Error: ' + err.message;
+            } finally {
+                btn.disabled = false;
+                btn.innerText = 'Upload Products';
+            }
+        }
+    </script>
+
+<!-- ================== GLOBAL UX FIXES ================== -->
+<style>
+#custom-toast-container { position: fixed; top: 20px; right: 20px; z-index: 999999; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
+.custom-toast { background: #0f1015; color: #fbbf24; border: 1px solid #f59e0b; padding: 8px 25px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); font-family: 'Montserrat', sans-serif; font-size: 14px; opacity: 0; transform: translateY(-20px); transition: all 0.3s ease; pointer-events: auto; max-width: 350px; word-wrap: break-word; }
+.custom-toast.show { opacity: 1; transform: translateY(0); }
+.custom-toast.error { background: #e74c3c; border-left: 4px solid #c0392b; }
+.custom-toast.success { background: #27ae60; border-left: 4px solid #2ecc71; }
+</style>
+<script>
+(function() {
+    // 1. Toast Notification Override
+    const container = document.createElement('div');
+    container.id = 'custom-toast-container';
+    document.body.appendChild(container);
+
+    window.alert = function(message) {
+        const toast = document.createElement('div');
+        toast.className = 'custom-toast';
+        if (typeof message === 'string') {
+            const msg = message.toLowerCase();
+            if (msg.includes('error') || msg.includes('fail')) toast.classList.add('error');
+            else if (msg.includes('success') || msg.includes('saved')) toast.classList.add('success');
+        }
+        toast.textContent = message;
+        container.appendChild(toast);
+        toast.offsetHeight; // trigger reflow
+        toast.classList.add('show');
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => toast.remove(), 300);
+        }, 4000);
+    };
+
+    // 2. Mobile Table Auto-Labeler
+    function applyTableDataLabels() {
+        document.querySelectorAll('.card-table').forEach(table => {
+            const headers = Array.from(table.querySelectorAll('thead th')).map(th => th.textContent.trim());
+            if (headers.length === 0) return;
+            table.querySelectorAll('tbody tr').forEach(tr => {
+                tr.querySelectorAll('td').forEach((td, index) => {
+                    if (headers[index] && !td.hasAttribute('data-label')) {
+                        td.setAttribute('data-label', headers[index]);
+                    }
+                });
+            });
+        });
+    }
+    /* Optimized: Global MutationObserver removed to prevent DOM thrashing */
+    
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', applyTableDataLabels);
+    } else {
+        applyTableDataLabels();
+    }
+})();
+</script>
+<!-- ====================================================== -->
+</body>
+</html>

@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <script src="auth-guard.js"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Legacy Insights | Settings</title>
+    <link rel="icon" type="image/png" href="logo.png">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="sidebar.css">
+    <style>
+        :root {
+            --primary-color: #f59e0b;
+            --secondary-color: #d97706;
+            --accent-color: #f59e0b;
+            --text-color: #202223;
+            --text-secondary: #6d7175;
+            --gray-light: #f6f6f7;
+            --sidebar-width: 260px;
+            --border-color: #e1e3e5;
+            --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            background: var(--gray-light);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            color: var(--text-color);
+        }
+
+        .main-content {
+            margin-left: var(--sidebar-width);
+            flex: 1;
+            padding: 28px 36px;
+            max-width: 900px;
+        }
+
+        .page-header {
+            margin-bottom: 24px;
+        }
+
+        .page-header h1 {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--text-color);
+            letter-spacing: -0.01em;
+            margin-bottom: 4px;
+        }
+
+        .page-header p {
+            color: var(--text-secondary);
+            font-size: 13.5px;
+        }
+
+        .settings-card {
+            background: white;
+            padding: 24px 28px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-card);
+            margin-bottom: 20px;
+        }
+
+        .card-header {
+            margin-bottom: 18px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #f1f2f3;
+        }
+
+        .card-header h2 {
+            font-size: 15.5px;
+            font-weight: 600;
+            color: var(--text-color);
+            margin-bottom: 2px;
+        }
+
+        .card-header p {
+            font-size: 12.5px;
+            color: var(--text-secondary);
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .form-grid.full {
+            grid-template-columns: 1fr;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            font-size: 13px;
+            color: var(--text-color);
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            height: 40px;
+            padding: 0 12px;
+            border: 1px solid #c9cccf;
+            border-radius: 6px;
+            font-size: 13.5px;
+            color: var(--text-color);
+            background: #ffffff;
+            outline: none;
+            transition: border-color 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.15);
+        }
+
+        .action-bar {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 12px;
+            margin-top: 24px;
+            margin-bottom: 40px;
+        }
+
+        .btn-save {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 22px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13.5px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: background 0.15s ease, transform 0.1s ease;
+            box-shadow: 0 1px 0 rgba(0, 0, 0, 0.05);
+        }
+
+        .btn-save:hover {
+            background: var(--secondary-color);
+        }
+
+        .btn-save:active {
+            transform: translateY(1px);
+        }
+
+        .btn-save:disabled {
+            opacity: 0.65;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-spinner {
+            display: none;
+            width: 14px;
+            height: 14px;
+            border: 2px solid rgba(255, 255, 255, 0.35);
+            border-top-color: #ffffff;
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Notification Toast */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: #202223;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 2000;
+            opacity: 0;
+            transform: translateY(-8px);
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            pointer-events: none;
+            font-size: 13.5px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .notification.show {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+
+        .notification.success {
+            background-color: #108043;
+            border-left: 4px solid #149a4f;
+        }
+
+        .notification.error {
+            background-color: #c42b1c;
+            border-left: 4px solid #f59e0b;
+        }
+
+        /* Mobile Responsive Styles */
+        .mobile-menu-btn {
+            display: none;
+            position: fixed;
+            top: 14px;
+            left: 14px;
+            z-index: 1001;
+            background: #1a1a1a;
+            color: white;
+            border: 1px solid #333;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+            font-size: 14px;
+        }
+
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        }
+
+        @media (max-width: 992px) {
+            .main-content {
+                margin-left: 0;
+                padding: 20px 16px;
+                padding-top: 64px;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .mobile-menu-btn {
+                display: block;
+            }
+
+            .overlay.active {
+                display: block;
+            }
+        }
+    </style>
+    <script src="currency.js"></script>
+    <script src="telemetry-guard.js"></script>
+    <script src="instant-nav.js"></script>
+</head>
+
+<body>
+    <button class="mobile-menu-btn" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+    <div class="overlay" onclick="toggleSidebar()"></div>
+
+    <div id="notification" class="notification"></div>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="brand">
+            <img src="logo.png" alt="Legacy Insights">
+        </div>
+        <div class="nav-links">
+            <a href="dashboard" class="nav-item"><i class="fas fa-home"></i> Dashboard</a>
+
+            <div class="nav-section">Sales & Finance</div>
+            <a href="sales-dashboard" class="nav-item"><i class="fas fa-chart-pie"></i> Sales</a>
+            <a href="profitability" class="nav-item"><i class="fas fa-file-invoice-dollar"></i> Profitability</a>
+            <a href="promotions" class="nav-item"><i class="fas fa-tags"></i> Promotions</a>
+
+            <div class="nav-section">Operations</div>
+            <a href="pos-register" class="nav-item"><i class="fas fa-users"></i> Staff</a>
+            <a href="credit-customers" class="nav-item"><i class="fas fa-address-book"></i> Credit</a>
+            <a href="inventory" class="nav-item"><i class="fas fa-warehouse"></i> Inventory</a>
+            <a href="reports" class="nav-item"><i class="fas fa-chart-line"></i> Reports</a>
+            <a href="settings" class="nav-item active"><i class="fas fa-cog"></i> Settings</a>
+        </div>
+        <div class="user-profile">
+            <div class="user-profile-row">
+                <div class="user-avatar"><i class="fas fa-user"></i></div>
+                <div class="user-info">
+                    <div id="userName">Manager</div>
+                    <div id="userRole">Store Management</div>
+                </div>
+            </div>
+            <button class="sidebar-logout-btn" onclick="logout()" title="Logout" aria-label="Logout"><i class="fas fa-sign-out-alt"></i></button>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="page-header">
+            <h1>System Settings</h1>
+            <p>Manage your store details, financial options, and receipt configuration</p>
+        </div>
+
+        <form id="settingsForm" onsubmit="event.preventDefault(); saveSettings();">
+            <!-- Store Profile Card -->
+            <div class="settings-card">
+                <div class="card-header">
+                    <h2>Store Profile</h2>
+                    <p>Basic identification for receipts and customer communications</p>
+                </div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="storeName">Store Name</label>
+                        <input type="text" id="storeName" placeholder="Legacy Insights" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="phone">Support Phone</label>
+                        <input type="text" id="phone" placeholder="+233 24 000 0000">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="taxId">Tax Identification Number (TIN)</label>
+                    <input type="text" id="taxId" placeholder="TIN-00000000">
+                </div>
+            </div>
+
+            <!-- Financial Configuration Card -->
+            <div class="settings-card">
+                <div class="card-header">
+                    <h2>Financial & Tax Configuration</h2>
+                    <p>Currency presentation and taxation rates</p>
+                </div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="currencySymbol">Currency Symbol</label>
+                        <select id="currencySymbol">
+                            <option value="₵">₵ (GHS - Ghana Cedi)</option>
+                            <option value="$">$ (USD - US Dollar)</option>
+                            <option value="£">£ (GBP - British Pound)</option>
+                            <option value="€">€ (EUR - Euro)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="vatRate">VAT Rate (%)</label>
+                        <input type="number" id="vatRate" step="0.01" min="0" max="100" placeholder="0.00">
+                    </div>
+                </div>
+                <div class="form-group" id="monthlyTargetGroup">
+                    <label for="monthlyTarget">Monthly Sales Target</label>
+                    <input type="number" id="monthlyTarget" step="100" min="0" placeholder="50000">
+                </div>
+            </div>
+
+            <!-- Receipt & POS Card -->
+            <div class="settings-card">
+                <div class="card-header">
+                    <h2>Receipt Configuration</h2>
+                    <p>Printed customer receipts message</p>
+                </div>
+                <div class="form-group">
+                    <label for="receiptFooter">Receipt Footer Message</label>
+                    <input type="text" id="receiptFooter" placeholder="Thank you for shopping with us!" value="Thank you for shopping with us!">
+                </div>
+            </div>
+
+            <!-- Action Bar with Save Button -->
+            <div class="action-bar">
+                <button type="submit" class="btn-save" id="btnSaveSettings">
+                    <span class="btn-spinner" id="btnSpinner"></span>
+                    <span id="btnText"><i class="fas fa-check"></i> Save Settings</span>
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <footer>
+        <span>&copy; 2026 Legacy Insights</span>
+        <span>&bull;</span>
+        <a href="#">Support</a>
+    </footer>
+
+    <script>
+        function toggleSidebar() {
+            document.querySelector('.sidebar')?.classList.toggle('active');
+            document.querySelector('.overlay')?.classList.toggle('active');
+        }
+
+        function populateForm(settings) {
+            if (!settings) return;
+            if (settings.store_name !== undefined) document.getElementById('storeName').value = settings.store_name || '';
+            if (settings.currency_symbol) document.getElementById('currencySymbol').value = settings.currency_symbol;
+            if (settings.vat_rate !== undefined) document.getElementById('vatRate').value = settings.vat_rate || 0;
+            if (settings.receipt_footer !== undefined) document.getElementById('receiptFooter').value = settings.receipt_footer || '';
+            if (settings.tax_id !== undefined && document.getElementById('taxId')) document.getElementById('taxId').value = settings.tax_id || '';
+            if (settings.phone !== undefined && document.getElementById('phone')) document.getElementById('phone').value = settings.phone || '';
+            if (settings.monthly_target !== undefined && document.getElementById('monthlyTarget')) document.getElementById('monthlyTarget').value = settings.monthly_target || '';
+        }
+
+        let currentUserRole = '';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Populate user info from localStorage safely
+            try {
+                const userStr = localStorage.getItem('currentUser') || localStorage.getItem('companyUser');
+                if (userStr) {
+                    const user = JSON.parse(userStr);
+                    currentUserRole = (user.role || '').toLowerCase();
+                    if (document.getElementById('userName')) document.getElementById('userName').textContent = user.name || user.fullName || 'User';
+                    if (document.getElementById('userRole')) {
+                        const _roleLabel = user.role === 'manager' ? 'Store Manager' : (user.role === 'admin' ? 'Administrator' : (user.role || 'Staff'));
+                        const _branchLabel = user.store_location ? ` · ${user.store_location}` : '';
+                        document.getElementById('userRole').textContent = _roleLabel + _branchLabel;
+                    }
+                }
+            } catch (e) { console.error('User parse error:', e); }
+
+            // Monthly Sales Target is strictly for CEO / Admin; hidden in manager profile
+            const isCeoOrAdmin = currentUserRole === 'ceo' || currentUserRole === 'admin' || currentUserRole === 'company';
+            const targetGroup = document.getElementById('monthlyTargetGroup');
+            if (targetGroup) {
+                if (!isCeoOrAdmin) {
+                    targetGroup.style.display = 'none';
+                } else {
+                    targetGroup.style.display = 'block';
+                }
+            }
+
+            // Pre-load from cached posSettings first to eliminate blank flash
+            try {
+                const cached = localStorage.getItem('posSettings');
+                if (cached) populateForm(JSON.parse(cached));
+            } catch (e) {}
+
+            // Load fresh settings from API
+            const token = localStorage.getItem('authToken') || localStorage.getItem('companyToken');
+            fetch('/api/settings', { 
+                headers: token ? { 'Authorization': `Bearer ${token}` } : {},
+                credentials: 'include'
+            })
+            .then(res => {
+                if (res.ok) return res.json();
+                console.warn('Unable to fetch live settings, using local cache');
+                return null;
+            })
+            .then(settings => {
+                if (settings) {
+                    populateForm(settings);
+                    localStorage.setItem('posSettings', JSON.stringify(settings));
+                }
+            })
+            .catch(err => console.error('Error loading settings:', err));
+        });
+
+        function showNotification(message, type) {
+            const notif = document.getElementById('notification');
+            if (!notif) return;
+            notif.innerHTML = `<span>${message}</span>`;
+            notif.className = `notification show ${type || 'success'}`;
+            setTimeout(() => { notif.className = 'notification'; }, 3500);
+        }
+
+        async function saveSettings() {
+            const btn = document.getElementById('btnSaveSettings');
+            const btnText = document.getElementById('btnText');
+            const btnSpinner = document.getElementById('btnSpinner');
+
+            const isCeoOrAdmin = currentUserRole === 'ceo' || currentUserRole === 'admin' || currentUserRole === 'company';
+            const targetGroup = document.getElementById('monthlyTargetGroup');
+            const isTargetVisible = isCeoOrAdmin && targetGroup && targetGroup.style.display !== 'none';
+
+            // Get existing cached target if user is manager so it isn't overwritten
+            let existingTarget = 0;
+            try {
+                const cached = JSON.parse(localStorage.getItem('posSettings') || '{}');
+                existingTarget = cached.monthly_target || 0;
+            } catch (e) {}
+
+            const settings = {
+                storeName: document.getElementById('storeName').value.trim(),
+                phone: document.getElementById('phone')?.value.trim() || '',
+                taxId: document.getElementById('taxId')?.value.trim() || '',
+                currencySymbol: document.getElementById('currencySymbol').value,
+                vatRate: parseFloat(document.getElementById('vatRate').value) || 0,
+                monthlyTarget: isTargetVisible ? (parseFloat(document.getElementById('monthlyTarget')?.value) || 0) : existingTarget,
+                receiptFooter: document.getElementById('receiptFooter').value.trim()
+            };
+
+            if (btn) btn.disabled = true;
+            if (btnSpinner) btnSpinner.style.display = 'inline-block';
+            if (btnText) btnText.innerHTML = 'Saving...';
+
+            try {
+                const token = localStorage.getItem('authToken') || localStorage.getItem('companyToken');
+                const res = await fetch('/api/settings', {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json', 
+                        ...(token ? { 'Authorization': `Bearer ${token}` } : {}) 
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify(settings)
+                });
+
+                const data = await res.json();
+
+                if (res.ok) {
+                    localStorage.setItem('posSettings', JSON.stringify({
+                        store_name: settings.storeName,
+                        phone: settings.phone,
+                        tax_id: settings.taxId,
+                        currency_symbol: settings.currencySymbol,
+                        vat_rate: settings.vatRate,
+                        monthly_target: settings.monthlyTarget,
+                        receipt_footer: settings.receiptFooter
+                    }));
+                    showNotification('Settings updated successfully!', 'success');
+                } else {
+                    showNotification(data.message || 'Failed to update settings.', 'error');
+                }
+            } catch (e) {
+                console.error('Save settings error:', e);
+                showNotification('Connection error while saving settings.', 'error');
+            } finally {
+                if (btn) btn.disabled = false;
+                if (btnSpinner) btnSpinner.style.display = 'none';
+                if (btnText) btnText.innerHTML = '<i class="fas fa-check"></i> Save Settings';
+            }
+        }
+
+        async function logout() {
+            if (window.authGuard && typeof window.authGuard.logout === 'function') {
+                return window.authGuard.logout();
+            }
+            try {
+                const token = localStorage.getItem('authToken') || localStorage.getItem('companyToken');
+                if (token) {
+                    await fetch('/api/logout', {
+                        method: 'POST',
+                        headers: { 'Authorization': `Bearer ${token}` },
+                        credentials: 'include'
+                    }).catch(() => {});
+                }
+            } catch (e) {
+                console.error(e);
+            } finally {
+                localStorage.clear();
+                sessionStorage.clear();
+                window.location.replace('/login?logout=true');
+            }
+        }
+    </script>
+</body>
+</html>

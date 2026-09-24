@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="auth-guard.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LEGACY INSIGHTS | Receipt</title>
+    <link rel="icon" type="image/png" href="logo.png">
+    <!-- Add JsBarcode library -->
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+    <style>
+        body {
+            font-family: 'Courier New', Courier, monospace;
+            font-weight: bold;
+            background: #f5f5f5;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        .receipt-container {
+            background: white;
+            width: 320px; /* Slightly wider for better layout */
+            max-width: 100%;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+        }
+        .header { text-align: center; margin-bottom: 20px; }
+        .store-logo { margin-bottom: 10px; }
+        .store-logo img { 
+            width: 60px; 
+            height: 60px; 
+            border-radius: 50%; 
+            object-fit: contain;
+            border: 2px solid #e5a824;
+        }
+        .store-name { 
+            font-size: 20px; 
+            font-weight: bold; 
+            text-transform: uppercase; 
+            margin-bottom: 5px;
+            color: #d97706;
+        }
+        .store-info { 
+            font-size: 11px; 
+            font-weight: bold;
+            color: #555; 
+            margin-bottom: 2px;
+            line-height: 1.3;
+        }
+        
+        .divider { 
+            border-top: 1px dashed #333; 
+            margin: 15px 0; 
+        }
+        
+        .barcode-section {
+            text-align: center;
+            margin: 15px 0;
+            padding: 10px;
+            background: #f9f9f9;
+            border-radius: 5px;
+        }
+        .barcode-label {
+            font-size: 10px;
+            font-weight: bold;
+            color: #666;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+        }
+        
+        .txn-details { 
+            font-size: 12px; 
+            margin-bottom: 15px;
+            background: #f9f9f9;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .detail-row { 
+            display: flex; 
+            justify-content: space-between; 
+            margin-bottom: 5px;
+            padding: 2px 0;
+        }
+        .detail-label {
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .items-table { 
+            width: 100%; 
+            font-size: 12px; 
+            border-collapse: collapse;
+            margin-bottom: 10px;
+        }
+        .items-table th { 
+            text-align: left; 
+            border-bottom: 2px solid #f59e0b; 
+            padding-bottom: 8px;
+            font-weight: bold;
+            color: #d97706;
+            font-size: 11px;
+            text-transform: uppercase;
+        }
+        .items-table td { 
+            padding: 6px 0;
+            vertical-align: top;
+            border-bottom: 1px dotted #ddd;
+            font-weight: bold;
+        }
+        .items-table tr:last-child td {
+            border-bottom: none;
+        }
+        .item-name {
+            font-weight: 500;
+            color: #333;
+        }
+        .qty-col { 
+            width: 40px; 
+            text-align: center; 
+            font-weight: bold;
+        }
+        .price-col { 
+            text-align: right; 
+            white-space: nowrap;
+            font-weight: bold;
+            color: #d97706;
+        }
+        
+        .totals-section { 
+            margin-top: 15px; 
+            font-size: 12px;
+            font-weight: bold;
+            background: #f9f9f9;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .total-row { 
+            display: flex; 
+            justify-content: space-between; 
+            margin-bottom: 5px;
+            padding: 2px 0;
+        }
+        .grand-total { 
+            font-size: 18px; 
+            font-weight: bold; 
+            margin-top: 10px; 
+            border-top: 2px solid #f59e0b; 
+            padding-top: 10px;
+            color: #d97706;
+        }
+        
+        .footer { 
+            text-align: center; 
+            font-size: 11px; 
+            font-weight: bold;
+            margin-top: 20px; 
+            color: #555;
+            padding-top: 15px;
+            border-top: 1px dashed #333;
+        }
+        
+        .actions { 
+            display: flex; 
+            gap: 10px; 
+            width: 320px;
+            max-width: 100%;
+        }
+        .btn { 
+            flex: 1; 
+            padding: 12px; 
+            border: none; 
+            border-radius: 6px; 
+            cursor: pointer; 
+            font-weight: bold; 
+            font-family: sans-serif;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        .btn-print { 
+            background: #f59e0b; color: #000000; font-weight: bold; 
+            color: white; 
+        }
+        .btn-print:hover {
+            background: #2a3a7c;
+        }
+        .btn-back { 
+            background: #e0e0e0; 
+            color: #333; 
+        }
+        .btn-back:hover {
+            background: #d0d0d0;
+        }
+
+        @media print {
+            body { 
+                background: white; 
+                padding: 0; 
+                margin: 0; 
+                display: block; 
+                font-weight: bold;
+            }
+            .receipt-container { 
+                box-shadow: none; 
+                width: 320px; 
+                max-width: 100%;
+                margin: 0; 
+                padding: 15px;
+                border: none;
+            }
+            .actions { display: none; }
+            @page { 
+                margin: 0; 
+                size: auto; 
+            }
+            .barcode-section {
+                background: white;
+            }
+            .txn-details, .totals-section {
+                background: white;
+            }
+        }
+    </style>
+    <script src="currency.js"></script>
+    <script src="telemetry-guard.js"></script>
+    <script src="instant-nav.js"></script>
+    <link rel="stylesheet" href="sidebar.css">
+</head>
+<body>
+
+    <div class="receipt-container">
+        <div class="header">
+            <div class="store-logo">
+                <img src="logo.png" alt="Store Logo" style="width: 38px; height: 38px; border-radius: 50%; object-fit: cover; border: 1.5px solid #e5a824;">
+            </div>
+            
+            <div class="store-info" id="rAddress">Stadium Road, Amasaman</div>
+            <div class="store-info" id="rPhone">Tel: +233 24 512 2959</div>
+        </div>
+
+
+        <div class="divider"></div>
+
+        <div class="txn-details">
+            <div class="detail-row">
+                <span class="detail-label">Date:</span>
+                <span id="rDate">...</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Cashier:</span>
+                <span id="rCashier">...</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Payment:</span>
+                <span id="rMethod">...</span>
+            </div>
+            <div class="detail-row" id="rCustomerRow" style="display:none;">
+                <span class="detail-label">Customer:</span>
+                <span id="rCustomer">...</span>
+            </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <table class="items-table">
+            <thead>
+                <tr>
+                    <th>Item</th>
+                    <th class="qty-col">Qty</th>
+                    <th class="price-col">Total</th>
+                </tr>
+            </thead>
+            <tbody id="rItems">
+                <!-- Items go here -->
+            </tbody>
+        </table>
+
+        <div class="divider"></div>
+
+        <div class="totals-section">
+            <div class="total-row">
+                <span>Subtotal</span>
+                <span id="rSubtotal">0.00</span>
+            </div>
+            
+            <div id="rTaxContainer">
+                <!-- Dynamic Taxes -->
+            </div>
+
+            <div class="total-row" id="rDiscountRow" style="display:none;">
+                <span>Discount</span>
+                <span id="rDiscount">0.00</span>
+            </div>
+
+            <div class="total-row grand-total">
+                <span>TOTAL</span>
+                <span id="rTotal">0.00</span>
+            </div>
+        </div>
+
+        <!-- Barcode Section -->
+        <div class="barcode-section">
+            <div class="barcode-label">Receipt #</div>
+            <svg id="barcode"></svg>
+            <div id="barcodeText" style="font-size: 12px; margin-top: 5px; font-weight: bold;"></div>
+        </div>
+
+        <div class="footer">
+            <p id="rFooter">Thank you for shopping with us</p>
+            <p style="font-size:9px; margin-top:5px;">Kindly check receipt & items purchased before exit<br>Developed by Whitsun (030 701 0806)</p>
+        </div>
+    </div>
+
+    <div class="actions">
+        <button class="btn btn-back" onclick="window.location.href='pos'">Back to POS</button>
+        <button class="btn btn-print" onclick="window.print()">Print Receipt</button>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const id = urlParams.get('id');
+            const source = urlParams.get('source');
+            
+            // Adjust Back button based on where the receipt was generated
+            const backBtn = document.querySelector('.btn-back');
+            if(source === 'portal' && backBtn) {
+                backBtn.textContent = 'Back to Quick Sale';
+                backBtn.onclick = () => window.location.href = 'company-portal.html';
+            }
+            
+            if(!id) {
+                alert("No receipt ID provided");
+                window.location.href = 'pos';
+                return;
+            }
+
+            try {
+                const token = localStorage.getItem('authToken') || localStorage.getItem('companyToken');
+                
+                // 1. Fetch Settings (for Store Name/Footer)
+                const settingsRes = await fetch('/api/settings', { headers: { 'Authorization': `Bearer ${token}` } });
+                if(settingsRes.ok) {
+                    const settings = await settingsRes.json();
+                    // if(settings.store_name) document.getElementById('rStoreName').textContent = settings.store_name;
+                    if(settings.receipt_footer) document.getElementById('rFooter').textContent = settings.receipt_footer;
+                }
+
+                // 2. Fetch Transaction
+                const res = await fetch(`/transactions/receipt/${id}`, { headers: { 'Authorization': `Bearer ${token}` } });
+                if(!res.ok) throw new Error("Transaction not found");
+                
+                const data = await res.json();
+                
+                // Populate Data
+                const date = new Date(data.created_at);
+                document.getElementById('rDate').textContent = date.toLocaleString();
+                const receiptNumber = data.receipt_number || data.id;
+                let cashierName = data.cashier_name || 'Staff';
+                if (cashierName === 'Chief Executive Officer') cashierName = 'Amasaman';
+                document.getElementById('rCashier').textContent = cashierName;
+                
+                // Set branch address from transaction data
+                if(data.branch_name) {
+                    document.getElementById('rAddress').textContent = data.branch_name;
+                } else if(data.store_location) {
+                    document.getElementById('rAddress').textContent = data.store_location;
+                }
+                
+                if (data.type === 'RETURN') {
+                    const headerTitle = document.querySelector('.store-name');
+                    headerTitle.textContent = 'RECEIPT';
+                }
+                
+                // Generate Barcode
+                try {
+                    JsBarcode("#barcode", receiptNumber, {
+                        format: "CODE128",
+                        width: 1.5,
+                        height: 50,
+                        displayValue: false,
+                        fontSize: 10,
+                        margin: 3
+                    });
+                    document.getElementById('barcodeText').textContent = receiptNumber;
+                } catch (e) {
+                    console.error('Barcode generation error:', e);
+                    document.getElementById('barcodeText').textContent = receiptNumber;
+                }
+                
+                if(data.customer_name) {
+                    document.getElementById('rCustomer').textContent = data.customer_name;
+                    document.getElementById('rCustomerRow').style.display = 'flex';
+                }
+
+                // Items with better formatting
+                const tbody = document.getElementById('rItems');
+                let items = data.items;
+                if(typeof items === 'string') items = JSON.parse(items);
+                
+                tbody.innerHTML = items.map(item => {
+                    const itemTotal = (item.price * item.qty);
+                    const itemDiscount = item.discount || 0;
+                    const finalTotal = itemTotal - itemDiscount;
+                    
+                    // Calculate net amount (before tax) for display
+                    let totalTaxRate = 0;
+                    if (data.taxBreakdown && data.taxBreakdown.length > 0) {
+                        totalTaxRate = data.taxBreakdown.reduce((sum, tax) => sum + (parseFloat(tax.rate) || 0), 0) / 100;
+                    }
+                    const netTotal = finalTotal / (1 + totalTaxRate);
+                    const itemTax = finalTotal - netTotal;
+                    
+                    return `
+                        <tr>
+                            <td class="item-name">
+                                <div>${item.name}</div>
+                                ${itemDiscount > 0 ? `<div style="font-size:10px; color:#e74c3c;">Discount: ${formatCurrency(itemDiscount)}</div>` : ''}
+                            </td>
+                            <td class="qty-col">${item.qty}</td>
+                            <td class="price-col">${formatCurrency(netTotal)}</td>
+                        </tr>
+                    `;
+                }).join('');
+
+                // Totals with better formatting - calculate from items for consistency
+                let calculatedSubtotal = 0;
+                let calculatedTotal = 0;
+                
+                items.forEach(item => {
+                    const itemTotal = (item.price * item.qty);
+                    const itemDiscount = item.discount || 0;
+                    const finalTotal = itemTotal - itemDiscount;
+                    
+                    // Calculate net amount for this item
+                    let totalTaxRate = 0;
+                    if (data.taxBreakdown && data.taxBreakdown.length > 0) {
+                        totalTaxRate = data.taxBreakdown.reduce((sum, tax) => sum + (parseFloat(tax.rate) || 0), 0) / 100;
+                    }
+                    const netTotal = finalTotal / (1 + totalTaxRate);
+                    
+                    calculatedSubtotal += netTotal;
+                    calculatedTotal += finalTotal;
+                });
+                
+                const taxAmount = calculatedTotal - calculatedSubtotal;
+                
+                document.getElementById('rSubtotal').textContent = formatCurrency(calculatedSubtotal);
+                document.getElementById('rTotal').textContent = formatCurrency(calculatedTotal);
+                document.getElementById('rMethod').textContent = (data.payment_method || 'Cash').toUpperCase();
+
+                if(data.discount > 0) {
+                    document.getElementById('rDiscount').textContent = formatCurrency(Math.abs(parseFloat(data.discount)));
+                    document.getElementById('rDiscountRow').style.display = 'flex';
+                }
+
+                // Dynamic Taxes with better formatting
+                const taxContainer = document.getElementById('rTaxContainer');
+                if(data.taxBreakdown && data.taxBreakdown.length > 0) {
+                    taxContainer.innerHTML = data.taxBreakdown.map(t => `
+                        <div class="total-row">
+                            <span>${t.name} (${t.rate}%)</span>
+                            <span>${formatCurrency(t.amount)}</span>
+                        </div>
+                    `).join('');
+                } else if (data.tax > 0) {
+                    taxContainer.innerHTML = `
+                        <div class="total-row">
+                            <span>VAT</span>
+                            <span>${formatCurrency(data.tax)}</span>
+                        </div>
+                    `;
+                }
+
+            } catch(e) {
+                console.error(e);
+                alert("Error loading receipt");
+            }
+        });
+    </script>
+
+<!-- ================== GLOBAL UX FIXES ================== -->
+<style>
+#custom-toast-container { position: fixed; top: 20px; right: 20px; z-index: 999999; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
+.custom-toast { background: #f59e0b; color: #000000; font-weight: bold; color: white; padding: 8px 25px; border-radius: 50%; box-shadow: 0 4px 12px rgba(0,0,0,0.15); font-family: 'Montserrat', sans-serif; font-size: 14px; opacity: 0; transform: translateY(-20px); transition: all 0.3s ease; pointer-events: auto; max-width: 350px; word-wrap: break-word; }
+.custom-toast.show { opacity: 1; transform: translateY(0); }
+.custom-toast.error { background: #e74c3c; border-left: 4px solid #c0392b; }
+.custom-toast.success { background: #27ae60; border-left: 4px solid #2ecc71; }
+</style>
+<script>
+(function() {
+    // 1. Toast Notification Override
+    const container = document.createElement('div');
+    container.id = 'custom-toast-container';
+    document.body.appendChild(container);
+
+    window.alert = function(message) {
+        const toast = document.createElement('div');
+        toast.className = 'custom-toast';
+        if (typeof message === 'string') {
+            const msg = message.toLowerCase();
+            if (msg.includes('error') || msg.includes('fail')) toast.classList.add('error');
+            else if (msg.includes('success') || msg.includes('saved')) toast.classList.add('success');
+        }
+        toast.textContent = message;
+        container.appendChild(toast);
+        toast.offsetHeight; // trigger reflow
+        toast.classList.add('show');
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => toast.remove(), 300);
+        }, 4000);
+    };
+
+    // 2. Mobile Table Auto-Labeler
+    function applyTableDataLabels() {
+        document.querySelectorAll('.card-table').forEach(table => {
+            const headers = Array.from(table.querySelectorAll('thead th')).map(th => th.textContent.trim());
+            if (headers.length === 0) return;
+            table.querySelectorAll('tbody tr').forEach(tr => {
+                tr.querySelectorAll('td').forEach((td, index) => {
+                    if (headers[index] && !td.hasAttribute('data-label')) {
+                        td.setAttribute('data-label', headers[index]);
+                    }
+                });
+            });
+        });
+    }
+    /* Optimized: Global MutationObserver removed to prevent DOM thrashing */
+    
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', applyTableDataLabels);
+    } else {
+        applyTableDataLabels();
+    }
+})();
+</script>
+<!-- ====================================================== -->
+</body>
+</html>

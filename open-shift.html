@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="auth-guard.js"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Legacy Insights | Open Shift</title>
+    <link rel="icon" type="image/png" href="logo.png">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #f59e0b;
+            --secondary-color: #d97706;
+            --gray-light: #f6f6f7;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; -webkit-font-smoothing: antialiased; }
+        body { background: var(--gray-light); min-height: 100vh; display: flex; flex-direction: column; visibility: hidden; }
+
+        /* Header */
+        header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            padding: 0 25px;
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: white;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        .brand { font-size: 18px; font-weight: 700; letter-spacing: 1px; font-family: 'Montserrat', sans-serif; display: flex; align-items: center; gap: 10px; white-space: nowrap; }
+        .user-info { font-size: 14px; opacity: 0.9; }
+
+        /* Container */
+        .container {
+            max-width: 500px;
+            margin: 60px auto;
+            width: 90%;
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            text-align: center;
+        }
+
+        h2 { color: var(--primary-color); margin-bottom: 10px; }
+        p { color: #666; margin-bottom: 30px; font-size: 14px; }
+
+        .form-group { margin-bottom: 20px; text-align: left; }
+        .form-group label { display: block; font-size: 13px; font-weight: 600; color: #555; margin-bottom: 8px; }
+        .input-field {
+            width: 100%; padding: 15px; font-size: 16px; border: 1px solid #ddd; border-radius: 8px; outline: none; transition: 0.3s;
+        }
+        .input-field:focus { border-color: var(--primary-color); }
+        textarea.input-field { resize: vertical; min-height: 80px; }
+
+        .btn-open {
+            width: 100%; padding: 15px; background: var(--primary-color); color: white; border: none; border-radius: 8px;
+            font-size: 16px; font-weight: 600; cursor: pointer; transition: 0.2s; margin-top: 10px;
+        }
+        .btn-open:hover { opacity: 0.9; }
+
+        /* Footer */
+        footer {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            padding: 8px 25px;
+            display: flex;
+            justify-content: center;
+            font-size: 12px;
+            color: white;
+            margin-top: auto;
+        }
+
+        /* Mobile Breakpoints */
+        @media (max-width: 600px) {
+            header { padding: 10px; flex-direction: column; height: auto; justify-content: center; gap: 5px; text-align: center; }
+            .brand { font-size: 14px; white-space: normal; }
+            .brand img { width: 36px !important; height: 36px !important; border-radius: 50% !important; border: 1.5px solid #e5a824 !important; object-fit: cover !important; }
+            .user-info { font-size: 12px; }
+        }
+    </style>
+    <script src="currency.js"></script>
+    <script src="telemetry-guard.js"></script>
+    <script src="instant-nav.js"></script>
+    <link rel="stylesheet" href="sidebar.css">
+</head>
+<body>
+
+    <header>
+        <div class="brand"><img src="logo.png" alt="LEGACY INSIGHTS" style="width: 38px; height: 38px; border-radius: 50%; object-fit: cover; border: 1.5px solid #e5a824;"><span style="font-size: 15px; font-weight: 700; color: #ffffff; letter-spacing: 0.05em; text-transform: uppercase;">LEGACY INSIGHTS</span></div>
+        <div class="user-info" id="userName">Teller</div>
+    </header>
+
+    <div class="container">
+        <div style="font-size: 48px; margin-bottom: 20px;">☀️</div>
+        <h2>Start Your Shift</h2>
+        <p>Enter your opening cash amount to begin sales.</p>
+
+        <form onsubmit="openShift(event)">
+            <div class="form-group">
+                <label>Opening Cash Amount</label>
+                <input type="number" id="startCash" class="input-field" placeholder="0.00" step="0.01" required>
+            </div>
+            <div class="form-group">
+                <label>Notes (Optional)</label>
+                <textarea id="notes" class="input-field" placeholder="Any notes for this shift..."></textarea>
+            </div>
+            <button type="submit" class="btn-open">Open Shift</button>
+        </form>
+    </div>
+
+    <footer>
+        <div>&copy; 2025 Legacy Insights. All rights reserved.</div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const token = localStorage.getItem('authToken');
+                if (!token) {
+                    window.location.href = '/';
+                    return;
+                }
+
+                const response = await fetch('/api/session', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                if (!response.ok) {
+                    window.location.href = '/';
+                    return;
+                }
+                
+                const data = await response.json();
+                const user = data.user;
+                const userRole = user.role ? user.role.toLowerCase() : '';
+                
+                // Verify user role - only cashier/teller can access this page
+                if (userRole === 'admin' || userRole === 'manager') {
+                    window.location.href = 'dashboard';
+                    return;
+                } else if (userRole !== 'cashier' && userRole !== 'teller') {
+                    // For any other role, redirect to login
+                    window.location.href = '/';
+                    return;
+                }
+                
+                // Update UI with user info
+                document.getElementById('userName').textContent = user.name || 'Cashier';
+                
+                // Check if shift is already open
+                const shiftCheck = await fetch('/api/shifts/active', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                if (shiftCheck.ok) {
+                    const shiftData = await shiftCheck.json();
+                    if (shiftData.active) {
+                        window.location.href = 'pos';
+                        return;
+                    }
+                }
+                document.body.style.visibility = 'visible';
+            } catch (error) {
+                console.error('Error checking session:', error);
+                window.location.href = '/';
+            }
+        });
+
+        async function openShift(e) {
+            e.preventDefault();
+            
+            // Open Customer Display immediately to use the user gesture (prevents popup blocker)
+            const customerWindow = window.open('customer-display', 'CustomerDisplay', 'width=800,height=600,menubar=no,toolbar=no');
+
+            const startCash = document.getElementById('startCash').value;
+            const notes = document.getElementById('notes').value;
+            const token = localStorage.getItem('authToken');
+
+            try {
+                // First get the current user's session
+                const sessionRes = await fetch('/api/session', {
+                    headers: { 
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (!sessionRes.ok) {
+                    if (customerWindow) customerWindow.close();
+                    window.location.href = '/';
+                    return;
+                }
+                
+                const { user } = await sessionRes.json();
+
+                // Then open the shift
+                const res = await fetch('/api/shifts/open', {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ 
+                        startCash: parseFloat(startCash) || 0, 
+                        notes 
+                    })
+                });
+
+                if (res.ok) {
+                    window.location.href = 'pos';
+                } else {
+                    if (customerWindow) customerWindow.close();
+                    const error = await res.json();
+                    alert(error.message || "Failed to open shift. Please try again.");
+                }
+            } catch (err) { 
+                if (customerWindow) customerWindow.close();
+                console.error('Shift open error:', err); 
+                alert("Connection error. Please check your connection and try again."); 
+            }
+        }
+    </script>
+
+<!-- ================== GLOBAL UX FIXES ================== -->
+<style>
+#custom-toast-container { position: fixed; top: 20px; right: 20px; z-index: 999999; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
+.custom-toast { background: #0f1015; color: #fbbf24; border: 1px solid #f59e0b; padding: 8px 25px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); font-family: 'Montserrat', sans-serif; font-size: 14px; opacity: 0; transform: translateY(-20px); transition: all 0.3s ease; pointer-events: auto; max-width: 350px; word-wrap: break-word; }
+.custom-toast.show { opacity: 1; transform: translateY(0); }
+.custom-toast.error { background: #e74c3c; border-left: 4px solid #c0392b; }
+.custom-toast.success { background: #27ae60; border-left: 4px solid #2ecc71; }
+</style>
+<script>
+(function() {
+    // 1. Toast Notification Override
+    const container = document.createElement('div');
+    container.id = 'custom-toast-container';
+    document.body.appendChild(container);
+
+    window.alert = function(message) {
+        const toast = document.createElement('div');
+        toast.className = 'custom-toast';
+        if (typeof message === 'string') {
+            const msg = message.toLowerCase();
+            if (msg.includes('error') || msg.includes('fail')) toast.classList.add('error');
+            else if (msg.includes('success') || msg.includes('saved')) toast.classList.add('success');
+        }
+        toast.textContent = message;
+        container.appendChild(toast);
+        toast.offsetHeight; // trigger reflow
+        toast.classList.add('show');
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => toast.remove(), 300);
+        }, 4000);
+    };
+
+    // 2. Mobile Table Auto-Labeler
+    function applyTableDataLabels() {
+        document.querySelectorAll('.card-table').forEach(table => {
+            const headers = Array.from(table.querySelectorAll('thead th')).map(th => th.textContent.trim());
+            if (headers.length === 0) return;
+            table.querySelectorAll('tbody tr').forEach(tr => {
+                tr.querySelectorAll('td').forEach((td, index) => {
+                    if (headers[index] && !td.hasAttribute('data-label')) {
+                        td.setAttribute('data-label', headers[index]);
+                    }
+                });
+            });
+        });
+    }
+    /* Optimized: Global MutationObserver removed to prevent DOM thrashing */
+    
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', applyTableDataLabels);
+    } else {
+        applyTableDataLabels();
+    }
+})();
+</script>
+<!-- ====================================================== -->
+</body>
+</html>

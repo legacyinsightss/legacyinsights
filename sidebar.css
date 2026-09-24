@@ -1,0 +1,585 @@
+/* ==========================================================================
+   LEGACY INSIGHTS - EXECUTIVE DESIGN SYSTEM (SIDEBAR & FOOTER)
+   Applies premium Black & Yellow / Gold aesthetics: deep noir (#0f1015),
+   subtle borders (#22232b), Inter typography, signature gold/yellow (#f59e0b) accents,
+   and round badge logo.
+   ========================================================================== */
+
+:root {
+    --sidebar-width: 260px;
+    --p-sidebar-bg: #0f1015;
+    --p-sidebar-surface: #17181f;
+    --p-sidebar-active: #22232c;
+    --p-sidebar-border: #22232b;
+    --p-sidebar-text: #f3f4f6;
+    --p-sidebar-text-muted: #9ca3af;
+    --p-sidebar-text-subdued: #6b7280;
+    --p-sidebar-hover: rgba(245, 158, 11, 0.08);
+    --p-color-primary: #f59e0b;
+    --p-color-primary-hover: #d97706;
+    --p-color-primary-subdued: rgba(245, 158, 11, 0.15);
+    --p-color-bg: #f6f6f7;
+    --p-color-border: #e1e3e5;
+    --p-font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+/* Custom Scrollbar - Shopify Polaris Minimal */
+.sidebar::-webkit-scrollbar {
+    width: 4px;
+}
+.sidebar::-webkit-scrollbar-track {
+    background: transparent;
+}
+.sidebar::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.14);
+    border-radius: 4px;
+}
+.sidebar::-webkit-scrollbar-thumb:hover {
+    background: rgba(245, 158, 11, 0.35);
+}
+
+/* Base Sidebar Container */
+.sidebar {
+    width: var(--sidebar-width) !important;
+    background-color: var(--p-sidebar-bg) !important;
+    background-image: none !important;
+    color: var(--p-sidebar-text) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    z-index: 1000 !important;
+    border-right: 1px solid var(--p-sidebar-border) !important;
+    box-shadow: 1px 0 0 var(--p-sidebar-border) !important;
+    transition: transform 0.2s cubic-bezier(0.25, 0.1, 0.25, 1) !important;
+    font-family: var(--p-font-family) !important;
+    -webkit-font-smoothing: antialiased !important;
+}
+
+/* Brand Header Area - Shopify Store Switcher Aesthetic */
+.sidebar .brand {
+    padding: 22px 16px 18px !important;
+    border-bottom: 1px solid var(--p-sidebar-border) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: transparent !important;
+    flex-shrink: 0 !important;
+    gap: 10px !important;
+}
+
+.sidebar .brand img {
+    max-width: 40px !important;
+    width: 40px !important;
+    height: 40px !important;
+    aspect-ratio: 1 / 1 !important;
+    border-radius: 50% !important;
+    object-fit: cover !important;
+    filter: none !important;
+    border: 1.5px solid #e5a824 !important;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.45), 0 0 8px rgba(229, 168, 36, 0.2) !important;
+    transition: transform 0.2s cubic-bezier(0.2, 0, 0, 1), box-shadow 0.2s ease !important;
+}
+
+.sidebar .brand img:hover {
+    transform: scale(1.05) !important;
+    box-shadow: 0 4px 14px rgba(229, 168, 36, 0.35) !important;
+}
+
+/* Portal Role Badge - Polaris Pill */
+.sidebar-role-badge {
+    margin-top: 2px !important;
+    padding: 3px 10px !important;
+    border-radius: 20px !important;
+    font-size: 10.5px !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.05em !important;
+    text-transform: uppercase !important;
+    color: #fbbf24 !important;
+    background: var(--p-color-primary-subdued) !important;
+    border: 1px solid rgba(245, 158, 11, 0.35) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+}
+
+.sidebar-role-badge::before {
+    content: '' !important;
+    width: 5px !important;
+    height: 5px !important;
+    border-radius: 50% !important;
+    background-color: var(--p-color-primary) !important;
+    display: inline-block !important;
+    box-shadow: 0 0 6px var(--p-color-primary) !important;
+}
+
+/* Navigation Links Container - Shopify Polaris Group */
+.sidebar .nav-links {
+    flex: 1 !important;
+    padding: 12px 10px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 3px !important;
+}
+
+/* Category / Section Headers - Shopify Polaris Section Header */
+.sidebar .nav-section {
+    padding: 18px 12px 6px !important;
+    margin-top: 4px !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.06em !important;
+    text-transform: uppercase !important;
+    color: #71717a !important;
+    opacity: 1 !important;
+    background: transparent !important;
+    border: none !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    position: relative !important;
+}
+
+.sidebar .nav-section::after {
+    content: '' !important;
+    flex: 1 !important;
+    height: 1px !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+    margin-left: 4px !important;
+}
+
+/* Navigation Item Pills - Authentic Shopify Polaris Style */
+.sidebar .nav-item {
+    display: flex !important;
+    align-items: center !important;
+    padding: 9px 12px !important;
+    margin: 1.5px 0 !important;
+    color: #d1d5db !important;
+    text-decoration: none !important;
+    font-size: 13.5px !important;
+    font-weight: 500 !important;
+    border-radius: 8px !important;
+    border: none !important;
+    background: transparent !important;
+    transition: background-color 0.15s cubic-bezier(0.2, 0, 0, 1), color 0.15s cubic-bezier(0.2, 0, 0, 1), transform 0.15s ease !important;
+    cursor: pointer !important;
+    gap: 12px !important;
+    position: relative !important;
+}
+
+.sidebar .nav-item i {
+    width: 20px !important;
+    font-size: 14px !important;
+    text-align: center !important;
+    color: #9ca3af !important;
+    margin-right: 0 !important;
+    transition: color 0.15s ease, transform 0.15s ease !important;
+    flex-shrink: 0 !important;
+}
+
+/* Nav Item Hover State - Shopify Soft Tint */
+.sidebar .nav-item:hover {
+    color: #ffffff !important;
+    background-color: rgba(255, 255, 255, 0.08) !important;
+    transform: none !important;
+}
+
+.sidebar .nav-item:hover i {
+    color: #ffffff !important;
+    transform: scale(1.08) !important;
+}
+
+/* Nav Item Active State - Shopify Selected Item with Signature Inset Indicator */
+.sidebar .nav-item.active {
+    color: #ffffff !important;
+    background-color: #20222b !important;
+    border: none !important;
+    font-weight: 600 !important;
+    box-shadow: inset 3.5px 0 0 var(--p-color-primary) !important;
+    transform: none !important;
+}
+
+.sidebar .nav-item.active i {
+    color: var(--p-color-primary) !important;
+    opacity: 1 !important;
+    transform: scale(1.06) !important;
+}
+
+/* User Profile Footer Card - Shopify Admin Account Box */
+.sidebar .user-profile,
+.sidebar > div:last-child {
+    margin: 10px 10px 14px !important;
+    padding: 10px 12px !important;
+    background: #171821 !important;
+    border: 1px solid #242533 !important;
+    border-radius: 10px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 10px !important;
+    flex-shrink: 0 !important;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25) !important;
+    transition: border-color 0.15s ease !important;
+}
+
+.sidebar .user-profile:hover,
+.sidebar > div:last-child:hover {
+    border-color: rgba(245, 158, 11, 0.35) !important;
+}
+
+.sidebar .user-profile-row {
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    overflow: hidden !important;
+    flex: 1 !important;
+}
+
+.sidebar .user-avatar {
+    width: 34px !important;
+    height: 34px !important;
+    min-width: 34px !important;
+    border-radius: 50% !important;
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;
+    border: 1px solid rgba(245, 158, 11, 0.4) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    color: #0b0c10 !important;
+    margin-right: 0 !important;
+    box-shadow: 0 2px 6px rgba(245, 158, 11, 0.25) !important;
+}
+
+.sidebar .user-avatar i {
+    color: #0b0c10 !important;
+}
+
+.sidebar .user-info {
+    overflow: hidden !important;
+    flex: 1 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 1.5px !important;
+}
+
+.sidebar .user-info #userName,
+.sidebar .user-info div:first-child {
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    color: #f3f4f6 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    letter-spacing: -0.01em !important;
+}
+
+.sidebar .user-info #userRole,
+.sidebar .user-info div:last-child {
+    font-size: 11px !important;
+    color: var(--p-sidebar-text-muted) !important;
+    text-transform: capitalize !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+}
+
+/* Logout Button */
+.sidebar .sidebar-logout-btn,
+.sidebar .user-profile .fa-sign-out-alt,
+.sidebar .user-profile [onclick*="logout"] {
+    width: 32px !important;
+    height: 32px !important;
+    min-width: 32px !important;
+    min-height: 32px !important;
+    border-radius: 8px !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    color: #9ca3af !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+    transition: all 0.15s ease !important;
+    margin-left: auto !important;
+    flex-shrink: 0 !important;
+    padding: 0 !important;
+    font-size: 13px !important;
+}
+
+.sidebar .sidebar-logout-btn:hover {
+    background: rgba(245, 158, 11, 0.18) !important;
+    border-color: rgba(245, 158, 11, 0.4) !important;
+    color: #fbbf24 !important;
+    transform: scale(1.05) !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2) !important;
+}
+
+.sidebar .sidebar-logout-btn:active {
+    transform: scale(0.96) !important;
+}
+
+/* Mobile Menu & Overlay */
+.sidebar-overlay,
+.overlay {
+    background: rgba(0, 0, 0, 0.5) !important;
+    backdrop-filter: blur(2px) !important;
+}
+
+@media (max-width: 992px) {
+    .sidebar {
+        transform: translateX(-100%) !important;
+    }
+    .sidebar.active {
+        transform: translateX(0) !important;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.4) !important;
+    }
+}
+
+/* ==========================================================================
+   SHOPIFY POLARIS FOOTER DESIGN SYSTEM
+   Clean, subdued, professional bottom bar matching Shopify admin standards
+   ========================================================================== */
+
+footer,
+.app-footer {
+    margin-left: var(--sidebar-width) !important;
+    padding: 14px 24px !important;
+    text-align: center !important;
+    font-size: 12px !important;
+    font-weight: 400 !important;
+    color: #6d7175 !important;
+    background-color: #f6f6f7 !important;
+    background-image: none !important;
+    border-top: 1px solid #e1e3e5 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    transition: margin-left 0.2s ease !important;
+    font-family: var(--p-font-family) !important;
+    margin-top: auto !important;
+    box-sizing: border-box !important;
+}
+
+footer a,
+.app-footer a {
+    color: var(--p-color-primary) !important;
+    text-decoration: none !important;
+    font-weight: 500 !important;
+    transition: color 0.15s ease !important;
+}
+
+footer a:hover,
+.app-footer a:hover {
+    color: var(--p-color-primary-hover) !important;
+    text-decoration: underline !important;
+}
+
+@media (max-width: 992px) {
+    footer,
+    .app-footer {
+        margin-left: 0 !important;
+    }
+}
+
+/* ==========================================================================
+   SHOPIFY POLARIS DATATABLE & INDEXTABLE DESIGN SYSTEM
+   Standardizes all tables across Legacy Insights to match authentic
+   Shopify admin table aesthetics: crisp border-bottoms, subdued uppercase
+   headers, Polaris 13.5px body text, subtle row hover, and pill badges.
+   ========================================================================== */
+
+table,
+.stock-table,
+.card-table,
+.receiving-table,
+.transfer-table,
+.supplier-table,
+.po-table,
+.shelf-table,
+.returns-table,
+.negative-table,
+.analytics-table,
+.category-table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    font-family: var(--p-font-family) !important;
+    font-size: 13.5px !important;
+    color: #202223 !important;
+    text-align: left !important;
+    background-color: #ffffff !important;
+}
+
+/* Shopify Table Card Wrapper */
+.table-card,
+.table-wrapper,
+.table-container,
+.table-scroll-wrapper,
+.card:has(table),
+.stock-card:has(table) {
+    background: #ffffff !important;
+    border: 1px solid #e1e3e5 !important;
+    border-radius: 8px !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+    overflow-x: auto !important;
+}
+
+/* Table Header (Polaris subdued column headers) */
+table thead,
+thead {
+    background-color: #fafbfb !important;
+    border-bottom: 1px solid #e1e3e5 !important;
+}
+
+table thead th,
+table th,
+thead tr th {
+    background-color: #fafbfb !important;
+    color: #5c5f62 !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.04em !important;
+    padding: 12px 16px !important;
+    border-top: none !important;
+    border-left: none !important;
+    border-right: none !important;
+    border-bottom: 1px solid #e1e3e5 !important;
+    white-space: nowrap !important;
+    vertical-align: middle !important;
+    font-family: var(--p-font-family) !important;
+}
+
+/* Table Body Cells */
+table tbody tr,
+tbody tr {
+    background-color: #ffffff !important;
+    border-bottom: 1px solid #f1f2f3 !important;
+    transition: background-color 0.12s ease-in-out !important;
+}
+
+table tbody tr:hover,
+tbody tr:hover {
+    background-color: #f7f8f9 !important;
+}
+
+table tbody tr:last-child,
+tbody tr:last-child {
+    border-bottom: none !important;
+}
+
+table tbody td,
+table td,
+tbody tr td {
+    padding: 13px 16px !important;
+    border-top: none !important;
+    border-left: none !important;
+    border-right: none !important;
+    border-bottom: 1px solid #f1f2f3 !important;
+    font-size: 13.5px !important;
+    font-weight: 400 !important;
+    line-height: 1.45 !important;
+    color: #202223 !important;
+    vertical-align: middle !important;
+    font-family: var(--p-font-family) !important;
+}
+
+/* Shopify Table Text Utilities */
+table td strong,
+table td b {
+    font-weight: 600 !important;
+    color: #202223 !important;
+}
+
+table td small,
+table td .subtext,
+table td .text-muted {
+    font-size: 12px !important;
+    color: #6d7175 !important;
+    display: block !important;
+    margin-top: 2px !important;
+}
+
+/* Right-aligned numeric columns */
+table th.text-right,
+table td.text-right,
+table th.numeric,
+table td.numeric {
+    text-align: right !important;
+    font-variant-numeric: tabular-nums !important;
+}
+
+/* Shopify Polaris Badges inside Tables */
+table .badge,
+table .status,
+table .status-badge,
+table .tag {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 5px !important;
+    padding: 3px 8px !important;
+    border-radius: 12px !important;
+    font-size: 11.5px !important;
+    font-weight: 500 !important;
+    line-height: 1.2 !important;
+    white-space: nowrap !important;
+    text-transform: capitalize !important;
+}
+
+/* Success / Paid / In Stock Badge */
+table .badge-success,
+table .status-paid,
+table .status-completed,
+table .status-instock,
+table .badge-instock {
+    background-color: #e3f1df !important;
+    color: #108043 !important;
+    border: 1px solid transparent !important;
+}
+
+/* Warning / Pending / Low Stock Badge */
+table .badge-warning,
+table .status-pending,
+table .status-lowstock,
+table .badge-lowstock {
+    background-color: #fff5ea !important;
+    color: #b45309 !important;
+    border: 1px solid transparent !important;
+}
+
+/* Danger / Out of Stock / Cancelled Badge */
+table .badge-danger,
+table .status-cancelled,
+table .status-outstock,
+table .status-failed,
+table .badge-outstock {
+    background-color: #fde8e8 !important;
+    color: #d72c0d !important;
+    border: 1px solid transparent !important;
+}
+
+/* Neutral / Default Badge */
+table .badge-secondary,
+table .badge-neutral,
+table .status-draft,
+table .badge-draft {
+    background-color: #e4e5e7 !important;
+    color: #4a4c4e !important;
+    border: 1px solid transparent !important;
+}
+
+/* Info / Blue Badge */
+table .badge-info,
+table .status-processing {
+    background-color: #e0f2fe !important;
+    color: #0284c7 !important;
+    border: 1px solid transparent !important;
+}

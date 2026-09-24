@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="auth-guard.js"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Legacy Insights | Categories</title>
+    <link rel="icon" type="image/png" href="logo.png">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="sidebar.css">
+    <style>
+        :root { 
+            --primary-color: #f59e0b; 
+            --secondary-color: #d97706; 
+            --accent-color: #f59e0b; 
+            --text-color: #202223; 
+            --text-secondary: #6d7175;
+            --gray-light: #f6f6f7; 
+            --border-color: #e1e3e5;
+            --sidebar-width: 260px; 
+            --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; -webkit-font-smoothing: antialiased; }
+        body { background: var(--gray-light); display: flex; flex-direction: column; min-height: 100vh; color: var(--text-color); }
+        .main-content { margin-left: var(--sidebar-width); flex: 1; padding: 28px 36px; }
+        
+        .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+        .btn-add { background: var(--primary-color); color: white; padding: 10px 20px; border-radius: 6px; text-decoration: none; border: none; cursor: pointer; display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 13.5px; transition: background 0.15s ease; }
+        .btn-add:hover { background: var(--secondary-color); }
+        .inventory-card { background: white; padding: 22px 24px; border-radius: 8px; border: 1px solid var(--border-color); box-shadow: var(--shadow-card); }
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: left; padding: 11px 14px; color: var(--text-secondary); font-weight: 600; font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.04em; border-bottom: 1px solid var(--border-color); background: #fafbfb; }
+        td { padding: 12px 14px; border-bottom: 1px solid #f1f2f3; color: var(--text-color); font-size: 13.5px; }
+        .action-btn { width: 32px; height: 32px; border-radius: 6px; border: none; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; font-size: 14px; transition: all 0.2s; margin-right: 5px; }
+        .btn-delete { background: #fff4f4; color: #c42b1c; border: 1px solid #ffd2cf; }
+
+        /* Modal */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; z-index: 1000; }
+        .modal.active { display: flex; }
+        .modal-content { background: white; padding: 30px; border-radius: 12px; width: 400px; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-size: 14px; color: #666; }
+        .form-group input, .form-group textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; }
+        .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+        .btn-cancel { background: #eee; color: #333; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; }
+        .btn-save { background: var(--primary-color); color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; }
+        
+        footer { margin-left: var(--sidebar-width); padding: 10px; text-align: center; color: white; font-size: 12px; background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); }
+    .user-profile-row { display: flex; align-items: center; gap: 10px; }
+        
+        .sidebar-logout-btn { margin-left: auto; flex-shrink: 0; background: none; border: none; color: rgba(255,255,255,0.65); cursor: pointer; padding: 7px; border-radius: 6px; font-size: 16px; line-height: 1; transition: color 0.2s ease, background 0.2s ease; } .sidebar-logout-btn:hover { color: white; background: rgba(220,53,69,0.6); }
+        </style>
+    <script src="currency.js"></script>
+    <script src="telemetry-guard.js"></script>
+    <script src="instant-nav.js"></script>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="brand" style="display: flex; flex-direction: column; align-items: center;">
+            <img src="logo.png" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 1.5px solid #e5a824;">
+            
+        </div>
+        <div class="nav-links">
+            <a href="dashboard" class="nav-item"><i class="fas fa-home"></i> Dashboard</a>
+            <div class="nav-section">Sales & Finance</div>
+            <a href="sales-dashboard" class="nav-item"><i class="fas fa-chart-pie"></i> Sales</a>
+            <a href="profitability" class="nav-item"><i class="fas fa-file-invoice-dollar"></i> Profitability</a>
+            <a href="promotions" class="nav-item"><i class="fas fa-tags"></i> Promotions</a>
+            <div class="nav-section">Operations</div>
+            <a href="pos-register" class="nav-item"><i class="fas fa-user-plus"></i> Register Cashier</a>
+            <a href="credit-customers" class="nav-item"><i class="fas fa-address-book"></i> Credit</a>
+            <a href="inventory" class="nav-item active"><i class="fas fa-warehouse"></i> Inventory</a>
+            <a href="reports" class="nav-item"><i class="fas fa-chart-line"></i> Reports</a>
+            <a href="settings" class="nav-item"><i class="fas fa-cog"></i> Settings</a>
+        </div>
+        <div class="user-profile">
+            <div class="user-profile-row">
+                <div class="user-avatar"><i class="fas fa-user"></i></div>
+            <div class="user-info">
+                <div style="font-weight: bold;" id="userName">Admin User</div>
+                <div style="font-size: 12px; opacity: 0.7;" id="userRole">Administrator</div>
+            </div>
+            </div>
+            <button class="sidebar-logout-btn" onclick="logout()" title="Logout" aria-label="Logout"><i class="fas fa-sign-out-alt"></i></button>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="page-header">
+            <div>
+                <a href="inventory" style="text-decoration:none; color:#666; font-size:14px;"><i class="fas fa-arrow-left"></i> Back to Inventory</a>
+                <h2 style="margin-top:10px;">Product Categories</h2>
+            </div>
+            <button class="btn-add" onclick="openModal()"><i class="fas fa-plus"></i> Add Category</button>
+        </div>
+
+        <div class="inventory-card">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Category Name</th>
+                        <th>Description</th>
+                        <th>Created At</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="categoryTable">
+                    <tr><td colspan="4" style="text-align:center; padding:20px; color:#888;">Loading...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Add Category Modal -->
+    <div id="categoryModal" class="modal">
+        <div class="modal-content">
+            <h3>Add Category</h3>
+            <form onsubmit="saveCategory(event)">
+                <div class="form-group">
+                    <label>Category Name</label>
+                    <input type="text" id="catName" required placeholder="e.g. Beverages">
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea id="catDesc" rows="3" placeholder="Optional description..."></textarea>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-cancel" onclick="closeModal()">Cancel</button>
+                    <button type="submit" class="btn-save">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <footer>© 2026 Legacy Insights</footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', loadCategories);
+
+        async function loadCategories() {
+            try {
+                const token = localStorage.getItem('authToken');
+                const res = await fetch('/api/categories', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const categories = await res.json();
+                const tbody = document.getElementById('categoryTable');
+                
+                if (categories.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:20px;">No categories found. Add one to get started.</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = categories.map(c => `
+                    <tr>
+                        <td style="font-weight:600; color:var(--primary-color);">${c.name}</td>
+                        <td>${c.description || '-'}</td>
+                        <td>${new Date(c.created_at).toLocaleDateString()}</td>
+                        <td>
+                            <button class="action-btn btn-delete" onclick="deleteCategory(${c.id})" title="Delete"><i class="fas fa-trash"></i></button>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (e) {
+                console.error(e);
+                document.getElementById('categoryTable').innerHTML = '<tr><td colspan="4" style="text-align:center; color:red;">Error loading categories</td></tr>';
+            }
+        }
+
+        function openModal() {
+            document.getElementById('catName').value = '';
+            document.getElementById('catDesc').value = '';
+            document.getElementById('categoryModal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('categoryModal').classList.remove('active');
+        }
+
+        async function saveCategory(e) {
+            e.preventDefault();
+            const name = document.getElementById('catName').value;
+            const description = document.getElementById('catDesc').value;
+
+            try {
+                const token = localStorage.getItem('authToken');
+                const res = await fetch('/api/categories', {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ name, description })
+                });
+
+                if (res.ok) {
+                    closeModal();
+                    loadCategories();
+                } else {
+                    alert("Error saving category");
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        async function deleteCategory(id) {
+            if (!confirm("Are you sure? This will not delete products in this category.")) return;
+            
+            try {
+                const token = localStorage.getItem('authToken');
+                const res = await fetch(`/api/categories/${id}`, { 
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.ok) {
+                    loadCategories();
+                } else {
+                    alert("Error deleting category");
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        async function logout() {
+            if (window.authGuard && typeof window.authGuard.logout === 'function') {
+                return window.authGuard.logout();
+            }
+            try {
+                const token = localStorage.getItem('authToken');
+                if (token) {
+                    await fetch('/api/logout', { 
+                        method: 'POST',
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    }).catch(() => {});
+                }
+            } catch (e) {
+                console.error(e);
+            } finally {
+                localStorage.clear();
+                sessionStorage.clear();
+                window.location.replace('/login?logout=true');
+            }
+        }
+    </script>
+
+<!-- ================== GLOBAL UX FIXES ================== -->
+<style>
+#custom-toast-container { position: fixed; top: 20px; right: 20px; z-index: 999999; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
+.custom-toast { background: #202223; color: white; padding: 8px 25px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); font-family: 'Montserrat', sans-serif; font-size: 14px; opacity: 0; transform: translateY(-20px); transition: all 0.3s ease; pointer-events: auto; max-width: 350px; word-wrap: break-word; }
+.custom-toast.show { opacity: 1; transform: translateY(0); }
+.custom-toast.error { background: #e74c3c; border-left: 4px solid #c0392b; }
+.custom-toast.success { background: #27ae60; border-left: 4px solid #2ecc71; }
+</style>
+<script>
+(function() {
+    // 1. Toast Notification Override
+    const container = document.createElement('div');
+    container.id = 'custom-toast-container';
+    document.body.appendChild(container);
+
+    window.alert = function(message) {
+        const toast = document.createElement('div');
+        toast.className = 'custom-toast';
+        if (typeof message === 'string') {
+            const msg = message.toLowerCase();
+            if (msg.includes('error') || msg.includes('fail')) toast.classList.add('error');
+            else if (msg.includes('success') || msg.includes('saved')) toast.classList.add('success');
+        }
+        toast.textContent = message;
+        container.appendChild(toast);
+        toast.offsetHeight; // trigger reflow
+        toast.classList.add('show');
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => toast.remove(), 300);
+        }, 4000);
+    };
+
+    // 2. Mobile Table Auto-Labeler
+    function applyTableDataLabels() {
+        document.querySelectorAll('.card-table').forEach(table => {
+            const headers = Array.from(table.querySelectorAll('thead th')).map(th => th.textContent.trim());
+            if (headers.length === 0) return;
+            table.querySelectorAll('tbody tr').forEach(tr => {
+                tr.querySelectorAll('td').forEach((td, index) => {
+                    if (headers[index] && !td.hasAttribute('data-label')) {
+                        td.setAttribute('data-label', headers[index]);
+                    }
+                });
+            });
+        });
+    }
+    /* Optimized: Global MutationObserver removed to prevent DOM thrashing */
+    
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', applyTableDataLabels);
+    } else {
+        applyTableDataLabels();
+    }
+})();
+</script>
+<!-- ====================================================== -->
+</body>
+</html>

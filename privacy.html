@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Legacy Insights | Privacy Policy & Data Governance</title>
+    <link rel="icon" type="image/png" href="logo.png">
+
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --p-color-primary: #f59e0b;
+            --p-color-primary-hover: #d97706;
+            --p-color-bg: #f6f6f7;
+            --p-color-surface: #ffffff;
+            --p-color-border: #e1e3e5;
+            --p-color-text: #202223;
+            --p-color-text-secondary: #6d7175;
+            --p-color-text-subdued: #8c9196;
+            --p-font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: var(--p-font-family);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            background-color: var(--p-color-bg);
+            color: var(--p-color-text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Top Header */
+        .site-header {
+            background-color: #1a1a1a;
+            border-bottom: 1px solid #2e2e2e;
+            padding: 14px 28px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-brand {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            text-decoration: none;
+        }
+
+        .header-brand img {
+            width: 36px;
+            height: 36px;
+            aspect-ratio: 1 / 1;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 1.5px solid #e5a824;
+        }
+
+        .header-badge {
+            background: rgba(245, 158, 11, 0.2);
+            border: 1px solid rgba(245, 158, 11, 0.4);
+            color: #ff9b8e;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .btn-header {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 14px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.15s ease;
+        }
+
+        .btn-header:hover {
+            background: rgba(255, 255, 255, 0.18);
+            color: #ffffff;
+        }
+
+        /* Policy Container */
+        .policy-container {
+            max-width: 860px;
+            width: 100%;
+            margin: 40px auto 60px;
+            padding: 0 20px;
+            flex: 1;
+        }
+
+        .policy-card {
+            background: #ffffff;
+            border: 1px solid var(--p-color-border);
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+            padding: 44px 48px;
+        }
+
+        .policy-header {
+            border-bottom: 1px solid var(--p-color-border);
+            padding-bottom: 24px;
+            margin-bottom: 32px;
+        }
+
+        .policy-header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--p-color-text);
+            margin-bottom: 8px;
+            letter-spacing: -0.02em;
+        }
+
+        .policy-meta {
+            font-size: 13px;
+            color: var(--p-color-text-secondary);
+        }
+
+        .policy-section {
+            margin-bottom: 32px;
+        }
+
+        .policy-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .policy-section h2 {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--p-color-text);
+            margin-bottom: 12px;
+        }
+
+        .policy-section p {
+            font-size: 14px;
+            line-height: 1.65;
+            color: #4a4c4e;
+            margin-bottom: 14px;
+        }
+
+        .policy-section ul {
+            padding-left: 24px;
+            margin-bottom: 14px;
+        }
+
+        .policy-section li {
+            font-size: 14px;
+            line-height: 1.6;
+            color: #4a4c4e;
+            margin-bottom: 6px;
+        }
+
+        .security-callout {
+            background: #f1f8f5;
+            border: 1px solid #b7e3cd;
+            border-left: 4px solid #108043;
+            border-radius: 8px;
+            padding: 16px 20px;
+            margin: 20px 0;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .security-callout i {
+            color: #108043;
+            font-size: 18px;
+            margin-top: 2px;
+        }
+
+        .security-callout-text h4 {
+            font-size: 14px;
+            font-weight: 600;
+            color: #108043;
+            margin-bottom: 4px;
+        }
+
+        .security-callout-text p {
+            font-size: 13px;
+            color: #202223;
+            margin: 0;
+            line-height: 1.5;
+        }
+
+        /* Footer */
+        .site-footer {
+            background: #ffffff;
+            border-top: 1px solid var(--p-color-border);
+            padding: 24px;
+            text-align: center;
+            font-size: 12.5px;
+            color: var(--p-color-text-secondary);
+            margin-top: auto;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 10px;
+        }
+
+        .footer-links a {
+            color: var(--p-color-text-secondary);
+            text-decoration: none;
+        }
+
+        .footer-links a:hover {
+            color: var(--p-color-primary);
+            text-decoration: underline;
+        }
+
+        @media (max-width: 600px) {
+            .policy-card {
+                padding: 28px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header class="site-header">
+        <a href="login" class="header-brand">
+            <img src="logo.png" alt="LEGACY INSIGHTS">
+            <span style="font-size: 15px; font-weight: 700; color: #fff; letter-spacing: 0.05em; text-transform: uppercase;">LEGACY INSIGHTS</span>
+            <span class="header-badge">Privacy & Governance</span>
+        </a>
+        <a href="login" class="btn-header"><i class="fas fa-arrow-left"></i> Return to Log In</a>
+    </header>
+
+    <!-- Policy Content -->
+    <main class="policy-container">
+        <article class="policy-card">
+            <header class="policy-header">
+                <h1>Privacy Policy & Data Protection</h1>
+                <div class="policy-meta">
+                    <span>Effective Date: September 2026</span> &bull; 
+                    <span>Version: 3.2 Enterprise Standard</span> &bull; 
+                    <span>Legacy Insights Retail Ltd.</span>
+                </div>
+            </header>
+
+            <section class="policy-section">
+                <h2>1. Commitment to Enterprise Privacy</h2>
+                <p>Legacy Insights ("we", "our", "the Enterprise") operates point-of-sale systems, multi-branch inventory databases, customer credit ledgers, and executive business intelligence portals. We are strictly committed to safeguarding business data, staff records, and customer personal information in full compliance with the <strong>Ghana Data Protection Act, 2012 (Act 843)</strong> and international enterprise information security standards.</p>
+            </section>
+
+            <div class="security-callout">
+                <i class="fas fa-shield-halved"></i>
+                <div class="security-callout-text">
+                    <h4>Zero-Trust Architecture & Cryptographic Isolation</h4>
+                    <p>All sensitive authentication tokens and database transactions are protected with TLS 1.3 in-transit and AES-256 at rest, guaranteeing full tenant separation and tamper-proof audit trails.</p>
+                </div>
+            </div>
+
+            <section class="policy-section">
+                <h2>2. Categories of Information Collected</h2>
+                <p>In operating our retail network, we collect and process the following operational records:</p>
+                <ul>
+                    <li><strong>Transaction & Payment Data:</strong> Invoice amounts, payment tender types (Cash, MTN/Telecel Mobile Money, Credit Card, Quick Credit balances), timestamp, and cashier identifier.</li>
+                    <li><strong>Customer Profile Information:</strong> Customer name, contact telephone number, business TIN, delivery address, and credit account limits.</li>
+                    <li><strong>Staff & Operator Telemetry:</strong> User accounts, role permissions (CEO, Admin, Manager, Cashier), shift open/close balances, and system action logs.</li>
+                    <li><strong>Inventory & Branch Movements:</strong> Stock unit costs, selling prices, physical inventory count reconciliations, and inter-branch transfer orders.</li>
+                </ul>
+            </section>
+
+            <section class="policy-section">
+                <h2>3. Use & Processing of Collected Data</h2>
+                <p>Your data is processed strictly for legitimate corporate commerce operations, including:</p>
+                <ul>
+                    <li>Authorizing POS register checkout transactions and generating printed or electronic sales receipts.</li>
+                    <li>Synchronizing live inventory quantities between Accra Main, Dzorwulu, and central logistics warehouses.</li>
+                    <li>Calculating accurate Cost of Goods Sold (COGS), VAT returns, and executive gross profit margins.</li>
+                    <li>Preventing internal fraud and discrepancies through immutable system audit trails.</li>
+                </ul>
+            </section>
+
+            <section class="policy-section">
+                <h2>4. Data Retention & Fiscal Compliance</h2>
+                <p>Sales transaction records and fiscal tax invoices are maintained for a minimum of <strong>6 years</strong> in accordance with Ghana Revenue Authority (GRA) financial reporting regulations. Operational session caches and temporary offline queues are cleared following verified database synchronization.</p>
+            </section>
+
+            <section class="policy-section">
+                <h2>5. Role-Based Access Controls (RBAC)</h2>
+                <p>Access to sensitive business telemetry is strictly segmented by verified user credentials:</p>
+                <ul>
+                    <li><strong>Cashiers:</strong> Restricted solely to POS ringing, cash handling, and customer receipts. Access to cost prices, profit margins, and targets is completely blocked.</li>
+                    <li><strong>Store Managers:</strong> Permitted to oversee branch stock, supplier purchase orders, and daily shift balancing. Monthly sales quotas and executive financial forecast configurations remain restricted to CEO/Admin.</li>
+                    <li><strong>CEO & Corporate Leadership:</strong> Full strategic oversight across all branches with multi-location financial consolidation.</li>
+                </ul>
+            </section>
+
+            <section class="policy-section">
+                <h2>6. Data Protection Officer (DPO) & Developer Contact</h2>
+                <p>Footprint is an enterprise retail operating system developed and maintained by <strong>whitsun.io</strong>. For inquiries concerning data privacy policies, compliance requests, or platform security audits, contact:</p>
+                <p>
+                    <strong>Footprint Security & Compliance</strong><br>
+                    Software Developer: <a href="https://whitsun.io" target="_blank" rel="noopener" style="color:var(--p-color-primary); font-weight:600;">whitsun.io</a><br>
+                    Email: <a href="mailto:support@whitsun.io" style="color:var(--p-color-primary);">support@whitsun.io</a>
+                </p>
+            </section>
+        </article>
+    </main>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+        <div class="footer-links">
+            <a href="help">Help Center</a>
+            <span>&bull;</span>
+            <a href="privacy">Privacy Policy</a>
+            <span>&bull;</span>
+            <a href="terms">Terms of Service</a>
+            <span>&bull;</span>
+            <a href="login">Log In</a>
+        </div>
+        <p>&copy; 2026 Footprint. All rights reserved.</p>
+    </footer>
+
+</body>
+</html>

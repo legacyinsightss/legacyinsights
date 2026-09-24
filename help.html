@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Legacy Insights | Help Center & Documentation</title>
+    <link rel="icon" type="image/png" href="logo.png">
+
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --p-color-primary: #f59e0b;
+            --p-color-primary-hover: #d97706;
+            --p-color-primary-subdued: rgba(245, 158, 11, 0.12);
+            --p-color-bg: #f6f6f7;
+            --p-color-surface: #ffffff;
+            --p-color-border: #e1e3e5;
+            --p-color-text: #202223;
+            --p-color-text-secondary: #6d7175;
+            --p-color-text-subdued: #8c9196;
+            --p-font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: var(--p-font-family);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            background-color: var(--p-color-bg);
+            color: var(--p-color-text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Top Header */
+        .site-header {
+            background-color: #1a1a1a;
+            border-bottom: 1px solid #2e2e2e;
+            padding: 14px 28px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-brand {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            text-decoration: none;
+        }
+
+        .header-brand img {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 1.5px solid #e5a824;
+        }
+
+        .header-badge {
+            background: rgba(245, 158, 11, 0.2);
+            border: 1px solid rgba(245, 158, 11, 0.4);
+            color: #ff9b8e;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .btn-header {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 14px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.15s ease;
+        }
+
+        .btn-header:hover {
+            background: rgba(255, 255, 255, 0.18);
+            color: #ffffff;
+        }
+
+        .btn-header.primary {
+            background: var(--p-color-primary);
+            border-color: var(--p-color-primary);
+        }
+
+        .btn-header.primary:hover {
+            background: var(--p-color-primary-hover);
+        }
+
+        /* Hero Banner */
+        .help-hero {
+            background: #ffffff;
+            border-bottom: 1px solid var(--p-color-border);
+            padding: 48px 24px 40px;
+            text-align: center;
+        }
+
+        .help-hero-inner {
+            max-width: 680px;
+            margin: 0 auto;
+        }
+
+        .help-hero h1 {
+            font-size: 32px;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 10px;
+            color: var(--p-color-text);
+        }
+
+        .help-hero p {
+            font-size: 15px;
+            color: var(--p-color-text-secondary);
+            line-height: 1.5;
+            margin-bottom: 24px;
+        }
+
+        .search-box {
+            position: relative;
+            max-width: 520px;
+            margin: 0 auto;
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--p-color-text-subdued);
+            font-size: 15px;
+        }
+
+        .search-box input {
+            width: 100%;
+            height: 44px;
+            padding: 0 16px 0 42px;
+            background: var(--p-color-bg);
+            border: 1px solid var(--p-color-border);
+            border-radius: 8px;
+            font-size: 14px;
+            outline: none;
+            transition: all 0.15s ease;
+        }
+
+        .search-box input:focus {
+            background: #ffffff;
+            border-color: var(--p-color-primary);
+            box-shadow: 0 0 0 2px var(--p-color-primary-subdued);
+        }
+
+        /* Main Container */
+        .main-container {
+            max-width: 1080px;
+            width: 100%;
+            margin: 36px auto;
+            padding: 0 20px;
+            flex: 1;
+        }
+
+        /* Grid of Help Topics */
+        .topic-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .topic-card {
+            background: #ffffff;
+            border: 1px solid var(--p-color-border);
+            border-radius: 10px;
+            padding: 24px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        .topic-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
+            border-color: #c9cccf;
+        }
+
+        .topic-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            margin-bottom: 16px;
+        }
+
+        .topic-icon.red { background: rgba(245, 158, 11, 0.15); color: #f59e0b; }
+        .topic-icon.green { background: rgba(16, 128, 67, 0.12); color: #108043; }
+        .topic-icon.blue { background: rgba(37, 99, 235, 0.12); color: #2563eb; }
+        .topic-icon.amber { background: rgba(217, 119, 6, 0.12); color: #d97706; }
+        .topic-icon.purple { background: rgba(124, 58, 237, 0.12); color: #7c3aed; }
+        .topic-icon.slate { background: rgba(100, 116, 139, 0.12); color: #475569; }
+
+        .topic-card h2 {
+            font-size: 17px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--p-color-text);
+        }
+
+        .topic-card p {
+            font-size: 13.5px;
+            color: var(--p-color-text-secondary);
+            line-height: 1.5;
+            margin-bottom: 16px;
+        }
+
+        .topic-links {
+            list-style: none;
+            border-top: 1px solid #f1f2f3;
+            padding-top: 14px;
+        }
+
+        .topic-links li {
+            margin-bottom: 8px;
+        }
+
+        .topic-links li:last-child {
+            margin-bottom: 0;
+        }
+
+        .topic-links a {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--p-color-primary);
+            text-decoration: none;
+            transition: color 0.15s ease;
+        }
+
+        .topic-links a:hover {
+            color: var(--p-color-primary-hover);
+            text-decoration: underline;
+        }
+
+        /* FAQ Section */
+        .faq-section {
+            background: #ffffff;
+            border: 1px solid var(--p-color-border);
+            border-radius: 10px;
+            padding: 32px;
+            margin-bottom: 40px;
+        }
+
+        .faq-section h2 {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+
+        .faq-item {
+            border-bottom: 1px solid #f1f2f3;
+            padding: 16px 0;
+        }
+
+        .faq-item:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .faq-question {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--p-color-text);
+            margin-bottom: 6px;
+        }
+
+        .faq-answer {
+            font-size: 13.5px;
+            color: var(--p-color-text-secondary);
+            line-height: 1.6;
+        }
+
+        /* Support Contact Card */
+        .support-card {
+            background: #1a1a1a;
+            color: #ffffff;
+            border-radius: 10px;
+            padding: 32px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+        }
+
+        .support-card h3 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .support-card p {
+            font-size: 13.5px;
+            color: #a0a0a0;
+        }
+
+        /* Footer */
+        .site-footer {
+            background: #ffffff;
+            border-top: 1px solid var(--p-color-border);
+            padding: 24px;
+            text-align: center;
+            font-size: 12.5px;
+            color: var(--p-color-text-secondary);
+            margin-top: auto;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 10px;
+        }
+
+        .footer-links a {
+            color: var(--p-color-text-secondary);
+            text-decoration: none;
+        }
+
+        .footer-links a:hover {
+            color: var(--p-color-primary);
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Site Header -->
+    <header class="site-header">
+        <a href="login" class="header-brand">
+            <img src="logo.png" alt="LEGACY INSIGHTS">
+            <span style="font-size: 15px; font-weight: 700; color: #fff; letter-spacing: 0.05em; text-transform: uppercase;">LEGACY INSIGHTS</span>
+            <span class="header-badge">Help Center</span>
+        </a>
+        <div class="header-actions">
+            <a href="login" class="btn-header"><i class="fas fa-arrow-left"></i> Back to Log In</a>
+            <a href="dashboard" class="btn-header primary"><i class="fas fa-desktop"></i> Workspace</a>
+        </div>
+    </header>
+
+    <!-- Hero Banner -->
+    <section class="help-hero">
+        <div class="help-hero-inner">
+            <h1>How can we help you today?</h1>
+            <p>Knowledge base, operational workflows, and technical documentation for Legacy Insights Enterprise POS & Commerce System.</p>
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" placeholder="Search guides, POS workflows, or shift guides..." id="searchInput">
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <main class="main-container">
+        <div class="topic-grid">
+            <!-- Topic 1: POS Operations -->
+            <div class="topic-card">
+                <div class="topic-icon red"><i class="fas fa-cash-register"></i></div>
+                <h2>POS & Shift Operations</h2>
+                <p>Learn how to open shifts, scan barcodes, process split tenders, and reconcile cash register balances.</p>
+                <ul class="topic-links">
+                    <li><a href="open-shift">Starting a New Shift <i class="fas fa-chevron-right"></i></a></li>
+                    <li><a href="pos">Processing Sales & Multi-Tender <i class="fas fa-chevron-right"></i></a></li>
+                    <li><a href="close-shift">Shift Balancing & Cash Closing <i class="fas fa-chevron-right"></i></a></li>
+                </ul>
+            </div>
+
+            <!-- Topic 2: Multi-Branch Inventory -->
+            <div class="topic-card">
+                <div class="topic-icon green"><i class="fas fa-boxes-stacked"></i></div>
+                <h2>Multi-Branch Inventory</h2>
+                <p>Centralized stock levels across Accra Main, Dzorwulu, and satellite hubs with automated inter-branch transfers.</p>
+                <ul class="topic-links">
+                    <li><a href="inventory">Inventory Master & Stock Counts <i class="fas fa-chevron-right"></i></a></li>
+                    <li><a href="negative-stock">Negative Stock Protection Rules <i class="fas fa-chevron-right"></i></a></li>
+                    <li><a href="bulk-upload">Bulk Product Import & CSV Fixes <i class="fas fa-chevron-right"></i></a></li>
+                </ul>
+            </div>
+
+            <!-- Topic 3: Executive Analytics & COGS -->
+            <div class="topic-card">
+                <div class="topic-icon amber"><i class="fas fa-chart-line"></i></div>
+                <h2>CEO & Manager Telemetry</h2>
+                <p>Understanding real-time gross margin calculation, audited cost of goods sold, and monthly sales quota tracking.</p>
+                <ul class="topic-links">
+                    <li><a href="profitability">Gross Sales vs Real COGS <i class="fas fa-chevron-right"></i></a></li>
+                    <li><a href="sales-dashboard">Sales Trends & Payment Breakdown <i class="fas fa-chevron-right"></i></a></li>
+                    <li><a href="reports">Audited Exportable Financial Reports <i class="fas fa-chevron-right"></i></a></li>
+                </ul>
+            </div>
+
+            <!-- Topic 4: Customer Credit & B2B -->
+            <div class="topic-card">
+                <div class="topic-icon blue"><i class="fas fa-user-shield"></i></div>
+                <h2>Credit & Corporate Accounts</h2>
+                <p>Managing credit customers, tracking statements of account, credit limits, and payment reconciliations.</p>
+                <ul class="topic-links">
+                    <li><a href="credit-customers">Customer Credit Directory <i class="fas fa-chevron-right"></i></a></li>
+                    <li><a href="company-portal">Corporate B2B Portal <i class="fas fa-chevron-right"></i></a></li>
+                    <li><a href="customers">Customer Profiles & History <i class="fas fa-chevron-right"></i></a></li>
+                </ul>
+            </div>
+
+            <!-- Topic 5: Security & Settings -->
+            <div class="topic-card">
+                <div class="topic-icon purple"><i class="fas fa-sliders"></i></div>
+                <h2>Configuration & Roles</h2>
+                <p>Store settings, currency symbols, VAT configuration, receipt footers, and role-based access management.</p>
+                <ul class="topic-links">
+                    <li><a href="settings">Store Profile & Tax Rates <i class="fas fa-chevron-right"></i></a></li>
+                    <li><a href="forgot-password">Password Reset Guide <i class="fas fa-chevron-right"></i></a></li>
+                    <li><a href="profile">Account Security & PIN Code <i class="fas fa-chevron-right"></i></a></li>
+                </ul>
+            </div>
+
+            <!-- Topic 6: Hardware & Barcode Scanning -->
+            <div class="topic-card">
+                <div class="topic-icon slate"><i class="fas fa-barcode"></i></div>
+                <h2>Hardware & Offline POS</h2>
+                <p>Setting up receipt printers, USB/Bluetooth barcode scanners, and operating during network downtime.</p>
+                <ul class="topic-links">
+                    <li><a href="pos">Offline Queue Synchronization <i class="fas fa-chevron-right"></i></a></li>
+                    <li><a href="customer-display">Dual Customer Display Screen <i class="fas fa-chevron-right"></i></a></li>
+                    <li><a href="receipt">Receipt Template & Printing <i class="fas fa-chevron-right"></i></a></li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- FAQ Section -->
+        <section class="faq-section">
+            <h2>Frequently Asked Questions</h2>
+            <div class="faq-item">
+                <div class="faq-question">What should I do if the internet goes down while ringing a customer?</div>
+                <div class="faq-answer">The POS engine features an automatic offline queue. Transactions will continue to be processed locally and will seamlessly synchronize with the central cloud database as soon as connectivity resumes.</div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">Why can't a Store Manager see the Monthly Sales Target in Settings?</div>
+                <div class="faq-answer">Monthly Sales Targets are reserved strictly for the CEO and Administrator profiles to ensure centralized strategic corporate quota governance across branches.</div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">How are Cost of Goods Sold (COGS) calculated?</div>
+                <div class="faq-answer">Every product has an individual unit cost price configured in Inventory. When a sale completes, the system calculates actual COGS based on that unit cost rather than an estimate, giving exact gross margin accuracy in the Profitability dashboard.</div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">How do I reset my account password if I'm locked out?</div>
+                <div class="faq-answer">Visit the <a href="forgot-password" style="color:var(--p-color-primary);">Reset Password page</a>, input your company email, and submit. If your account is verified, you will receive reset instructions. Alternatively, request your system administrator to update your credentials.</div>
+            </div>
+        </section>
+
+        <!-- Support Card -->
+        <div class="support-card">
+            <div>
+                <h3>Need specialized technical support?</h3>
+                <p>Footprint is engineered and supported by <strong>whitsun.io</strong>. Our technical engineering desk is available for escalations.</p>
+            </div>
+            <a href="mailto:support@whitsun.io" class="btn-header primary"><i class="fas fa-envelope"></i> Contact support@whitsun.io</a>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+        <div class="footer-links">
+            <a href="help">Help</a>
+            <span>&bull;</span>
+            <a href="privacy">Privacy Policy</a>
+            <span>&bull;</span>
+            <a href="terms">Terms of Service</a>
+            <span>&bull;</span>
+            <a href="login">Log In</a>
+        </div>
+        <p>&copy; 2026 Footprint. All rights reserved.</p>
+    </footer>
+
+</body>
+</html>
