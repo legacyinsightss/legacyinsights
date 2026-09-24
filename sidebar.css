@@ -92,6 +92,22 @@
     box-shadow: 0 4px 14px rgba(229, 168, 36, 0.35) !important;
 }
 
+/* Company Name under Logo */
+.sidebar .brand-title,
+.sidebar .brand .brand-name,
+.sidebar .brand > span:not(.sidebar-role-badge) {
+    font-size: 13.5px !important;
+    font-weight: 700 !important;
+    color: #ffffff !important;
+    letter-spacing: 0.08em !important;
+    text-transform: uppercase !important;
+    text-align: center !important;
+    line-height: 1.25 !important;
+    margin: 0 !important;
+    font-family: 'Inter', -apple-system, sans-serif !important;
+    white-space: nowrap !important;
+}
+
 /* Portal Role Badge - Polaris Pill */
 .sidebar-role-badge {
     margin-top: 2px !important;
