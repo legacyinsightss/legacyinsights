@@ -1785,9 +1785,10 @@ app.post('/api/users', authenticateToken, async (req, res) => {
             if (branchRes.rows.length > 0) storeId = branchRes.rows[0].id;
         }
 
-        // Hash password
+        // Hash password (defaults to Password123 if not explicitly provided)
+        const rawPassword = password || process.env.DEFAULT_USER_PASS || 'Password123';
         const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(password, salt);
+        const hashedPassword = await bcrypt.hash(rawPassword, salt);
 
         await pool.query(`
             INSERT INTO users (username, name, employee_id, phone, email, role, store_location, store_id, password, status)
