@@ -3320,24 +3320,37 @@
         }
 
         async function applyPromo() {
-            const code = document.getElementById('promoCode').value.trim().toUpperCase();
-            const token = localStorage.getItem('authToken');
-            console.log('applyPromo called with code:', code, 'token exists:', !!token);
+            const input = document.getElementById('promoCode');
+            const code = (input ? input.value : '').trim().toUpperCase();
+            if (!code) {
+                discountRate = 0;
+                currentPromoCode = null;
+                renderCart();
+                return;
+            }
 
+            // Check for direct manual percentage discount (e.g., "10%" or "5%")
+            const pctMatch = code.match(/^(\d+(?:\.\d+)?)%$/);
+            if (pctMatch) {
+                discountRate = parseFloat(pctMatch[1]) / 100;
+                currentPromoCode = code;
+                notify(`Discount applied: ${pctMatch[1]}% Off`, "success");
+                renderCart();
+                return;
+            }
+
+            const token = localStorage.getItem('authToken');
             try {
-                const res = await fetch(`/api/promotions/validate/${code}`, {
+                const res = await fetch(`/api/promotions/validate/${encodeURIComponent(code)}`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
-                console.log('Promo validation response status:', res.status);
 
                 if (res.ok) {
                     const data = await res.json();
-                    console.log('Promo validation success:', data);
                     discountRate = parseFloat(data.discount_percentage) / 100;
                     currentPromoCode = code;
                     notify(`Promo applied: ${data.discount_percentage}% Off`, "success");
                 } else {
-                    console.log('Promo validation failed');
                     discountRate = 0;
                     currentPromoCode = null;
                     notify("Invalid promo code", "error");
@@ -3346,13 +3359,13 @@
                 console.error('Promo validation error:', e);
                 notify("Connection error", "error");
             }
-            console.log('Calling renderCart after promo attempt');
             renderCart();
         }
 
         async function applyItemPromo(index, code) {
             const item = cart[index];
-            code = code.trim().toUpperCase();
+            if (!item) return;
+            code = (code || '').trim().toUpperCase();
 
             // Clear promo if input is empty
             if (!code) {
@@ -3363,10 +3376,44 @@
                 return;
             }
 
-            // Check for system-defined promo codes
+            // 1. Check for manual percentage discount (e.g., "10%", "5%")
+            const percentageMatch = code.match(/^(\d+(?:\.\d+)?)%$/);
+            if (percentageMatch) {
+                item.promoCode = code;
+                item.promoType = 'percentage';
+                item.promoValue = parseFloat(percentageMatch[1]);
+                notify(`${item.name}: ${item.promoValue}% discount applied`, 'success');
+                renderCart();
+                return;
+            }
+
+            // 2. Check for manual fixed amount discount (e.g., "1", "2.50", "10")
+            if (/^\d+(?:\.\d+)?$/.test(code)) {
+                item.promoCode = code;
+                item.promoType = 'fixed';
+                item.promoValue = parseFloat(code);
+                notify(`${item.name}: ${formatCurrency(item.promoValue)} discount applied`, 'success');
+                renderCart();
+                return;
+            }
+
+            // 3. Check for prefix discounts (e.g., "SAVE5", "DISCOUNT10")
+            if (code.startsWith('SAVE') || code.startsWith('DISCOUNT')) {
+                const amountMatch = code.match(/\d+\.?\d*/);
+                if (amountMatch) {
+                    item.promoCode = code;
+                    item.promoType = 'fixed';
+                    item.promoValue = parseFloat(amountMatch[0]);
+                    notify(`${item.name}: ${formatCurrency(item.promoValue)} discount applied`, 'success');
+                    renderCart();
+                    return;
+                }
+            }
+
+            // 4. Check database promo code for alphanumeric codes
             const token = localStorage.getItem('authToken');
             try {
-                const res = await fetch(`/api/promotions/validate/${code}`, {
+                const res = await fetch(`/api/promotions/validate/${encodeURIComponent(code)}`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
 
@@ -3377,33 +3424,10 @@
                     item.promoValue = parseFloat(data.discount_percentage) || parseFloat(data.discount_value) || 0;
                     notify(`${item.name}: ${data.discount_percentage || data.discount_value}${item.promoType === 'percentage' ? '%' : getCurrencySymbol()} off applied`, 'success');
                 } else {
-                    // Check for manual promo codes (SAVE5, 10%, 5, 10.50, etc.)
-                    const percentageMatch = code.match(/(\d+)%/);
-                    if (percentageMatch) {
-                        item.promoCode = code;
-                        item.promoType = 'percentage';
-                        item.promoValue = parseFloat(percentageMatch[1]);
-                        notify(`${item.name}: ${item.promoValue}% discount applied`, 'success');
-                    } else if (code.startsWith('SAVE') || code.startsWith('DISCOUNT')) {
-                        const amountMatch = code.match(/\d+\.?\d*/);
-                        if (amountMatch) {
-                            item.promoCode = code;
-                            item.promoType = 'fixed';
-                            item.promoValue = parseFloat(amountMatch[0]);
-                            notify(`${item.name}: ${formatCurrency(item.promoValue)} discount applied`, 'success');
-                        }
-                    } else if (/^\d+\.?\d*$/.test(code)) {
-                        // Plain number (e.g., "5" or "10.50") - treat as fixed amount
-                        item.promoCode = code;
-                        item.promoType = 'fixed';
-                        item.promoValue = parseFloat(code);
-                        notify(`${item.name}: ${formatCurrency(item.promoValue)} discount applied`, 'success');
-                    } else {
-                        delete item.promoCode;
-                        delete item.promoType;
-                        delete item.promoValue;
-                        notify(`Invalid promo code for ${item.name}`, 'error');
-                    }
+                    delete item.promoCode;
+                    delete item.promoType;
+                    delete item.promoValue;
+                    notify(`Invalid promo code for ${item.name}`, 'error');
                 }
             } catch (e) {
                 console.error('Item promo error:', e);
