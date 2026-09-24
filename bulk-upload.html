@@ -31,6 +31,11 @@
         .error { background: #ffebee; color: #c62828; border: 1px solid #ffcdd2; }
         .back-link { display: inline-flex; align-items: center; gap: 8px; color: #64748b; background: white; padding: 10px 20px; border-radius: 50px; text-decoration: none; font-size: 14px; font-weight: 600; margin-bottom: 20px; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 2px 10px rgba(0,0,0,0.05); border: none; }
         .back-link:hover { color: var(--primary-color, #f59e0b); transform: translateX(-5px); box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+
+        @media (max-width: 600px) {
+            body { padding: 16px 12px !important; }
+            .container { padding: 20px 14px !important; border-radius: 12px !important; }
+        }
     </style>
     <script src="currency.js"></script>
     <script src="telemetry-guard.js"></script>

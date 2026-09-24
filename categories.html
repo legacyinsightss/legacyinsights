@@ -39,15 +39,35 @@
         .btn-delete { background: #fff4f4; color: #c42b1c; border: 1px solid #ffd2cf; }
 
         /* Modal */
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; z-index: 1000; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; z-index: 1000; padding: 12px; box-sizing: border-box; }
         .modal.active { display: flex; }
-        .modal-content { background: white; padding: 30px; border-radius: 12px; width: 400px; }
+        .modal-content { background: white; padding: 25px; border-radius: 12px; width: 100%; max-width: 440px; box-sizing: border-box; }
         .form-group { margin-bottom: 15px; }
-        .form-group label { display: block; margin-bottom: 5px; font-size: 14px; color: #666; }
-        .form-group input, .form-group textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; }
+        .form-group label { display: block; margin-bottom: 5px; font-size: 14px; color: #666; font-weight: 500; }
+        .form-group input, .form-group textarea { width: 100%; padding: 10px 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; min-height: 42px; box-sizing: border-box; }
         .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
-        .btn-cancel { background: #eee; color: #333; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; }
-        .btn-save { background: var(--primary-color); color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; }
+        .btn-cancel { background: #eee; color: #333; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-size: 14px; min-height: 42px; }
+        .btn-save { background: var(--primary-color); color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600; min-height: 42px; }
+        
+        .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999; }
+        .overlay.active { display: block; }
+
+        @media (max-width: 992px) {
+            .sidebar { transform: translateX(-100%); z-index: 1000; transition: transform 0.3s ease; box-shadow: 5px 0 15px rgba(0,0,0,0.1); }
+            .sidebar.active { transform: translateX(0); }
+            .main-content { margin-left: 0; padding: 20px 16px; padding-top: 72px; }
+            .page-header { flex-direction: column; align-items: flex-start; gap: 12px; }
+            .page-header .btn-add { width: 100%; justify-content: center; }
+            .inventory-card { overflow-x: auto; padding: 16px; }
+            footer { margin-left: 0; }
+            .modal-content { padding: 20px 16px; width: 100% !important; max-width: 100% !important; }
+            .modal-actions { flex-wrap: wrap; gap: 8px; }
+            .modal-actions button { flex: 1 1 calc(50% - 6px); min-height: 42px; }
+        }
+
+        @media (max-width: 480px) {
+            .modal-actions button { flex: 1 1 100% !important; width: 100% !important; }
+        }
         
         footer { margin-left: var(--sidebar-width); padding: 10px; text-align: center; color: white; font-size: 12px; background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); }
     .user-profile-row { display: flex; align-items: center; gap: 10px; }
@@ -59,6 +79,16 @@
     <script src="instant-nav.js"></script>
 </head>
 <body>
+    <header class="mobile-header-bar" id="mobileHeaderBar">
+        <button type="button" class="mobile-header-btn" id="mobileHeaderToggle" onclick="toggleSidebar()" aria-label="Toggle navigation">
+            <i class="fas fa-bars"></i>
+        </button>
+        <div class="mobile-header-title" id="mobileHeaderTitle">Categories</div>
+        <div class="mobile-header-brand">
+            <img src="logo.png" alt="Legacy Insights Logo">
+        </div>
+    </header>
+    <div class="overlay" onclick="toggleSidebar()"></div>
     <div class="sidebar">
         <div class="brand">
             <img src="logo.png" alt="Legacy Insights">
@@ -169,6 +199,13 @@
                 console.error(e);
                 document.getElementById('categoryTable').innerHTML = '<tr><td colspan="4" style="text-align:center; color:red;">Error loading categories</td></tr>';
             }
+        }
+
+        function toggleSidebar() {
+            const sb = document.querySelector('.sidebar');
+            const ov = document.querySelector('.overlay');
+            if (sb) sb.classList.toggle('active');
+            if (ov) ov.classList.toggle('active');
         }
 
         function openModal() {

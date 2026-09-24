@@ -219,9 +219,107 @@
         document.addEventListener('DOMContentLoaded', injectSidebarStyles);
     }
 
-    // 8. Security Toast & Async Session Heartbeat on DOM Ready
+    // 7b. Standardized Fixed Mobile Header with Hamburger & Page Title
+    function initMobileHeaderBar() {
+        const sidebar = document.querySelector('.sidebar');
+        if (!sidebar) return;
+
+        const routeTitles = {
+            '/dashboard': 'Dashboard',
+            '/inventory': 'Inventory',
+            '/settings': 'Settings',
+            '/reports': 'Reports',
+            '/pos-register': 'Staff',
+            '/credit-customers': 'Credit',
+            '/categories': 'Categories',
+            '/locations': 'Locations',
+            '/tax-management': 'Tax Management',
+            '/sales-dashboard': 'Sales',
+            '/profitability': 'Profitability',
+            '/promotions': 'Promotions',
+            '/bulk-upload': 'Bulk Upload',
+            '/ceo-portal': 'Executive Hub',
+            '/profile': 'Profile',
+            '/pos': 'Point of Sale'
+        };
+
+        const currentRoute = getCurrentRoute();
+        let pageTitle = routeTitles[currentRoute];
+
+        if (!pageTitle) {
+            const activeNav = document.querySelector('.nav-links .nav-item.active') || document.querySelector('.nav-item.active');
+            if (activeNav) {
+                pageTitle = activeNav.textContent.trim();
+            } else {
+                const docTitle = document.title ? document.title.split('|')[1] || document.title.split('-')[1] || document.title : '';
+                pageTitle = docTitle.trim() || 'Legacy Insights';
+            }
+        }
+
+        let headerBar = document.getElementById('mobileHeaderBar');
+        if (!headerBar) {
+            headerBar = document.createElement('header');
+            headerBar.className = 'mobile-header-bar';
+            headerBar.id = 'mobileHeaderBar';
+            headerBar.innerHTML = `
+                <button type="button" class="mobile-header-btn" id="mobileHeaderToggle" aria-label="Toggle navigation">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="mobile-header-title" id="mobileHeaderTitle">${escapeHtml(pageTitle)}</div>
+                <div class="mobile-header-brand">
+                    <img src="logo.png" alt="Legacy Insights Logo">
+                </div>
+            `;
+            document.body.insertBefore(headerBar, document.body.firstChild);
+        } else {
+            const titleElem = document.getElementById('mobileHeaderTitle');
+            if (titleElem && !titleElem.textContent.trim()) {
+                titleElem.textContent = pageTitle;
+            }
+        }
+
+        const toggleBtn = document.getElementById('mobileHeaderToggle');
+        if (toggleBtn) {
+            toggleBtn.onclick = function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                if (typeof window.toggleSidebar === 'function') {
+                    window.toggleSidebar();
+                } else {
+                    const sb = document.querySelector('.sidebar');
+                    const ov = document.querySelector('.overlay') || document.querySelector('.sidebar-overlay');
+                    if (sb) sb.classList.toggle('active');
+                    if (ov) ov.classList.toggle('active');
+                }
+            };
+        }
+
+        let overlay = document.querySelector('.overlay') || document.querySelector('.sidebar-overlay');
+        if (!overlay) {
+            overlay = document.createElement('div');
+            overlay.className = 'overlay';
+            document.body.appendChild(overlay);
+        }
+        overlay.onclick = function() {
+            const sb = document.querySelector('.sidebar');
+            if (sb && sb.classList.contains('active')) {
+                sb.classList.remove('active');
+                overlay.classList.remove('active');
+            }
+        };
+
+        window.setMobileHeaderTitle = function(newTitle) {
+            const titleElem = document.getElementById('mobileHeaderTitle');
+            if (titleElem && newTitle) {
+                titleElem.textContent = newTitle;
+            }
+        };
+    }
+
+    // 8. Security Toast, Mobile Top Bar & Async Session Heartbeat on DOM Ready
     document.addEventListener('DOMContentLoaded', () => {
         injectSidebarStyles();
+        initMobileHeaderBar();
 
         // Check for RBAC violation flash alert
         const violationData = sessionStorage.getItem('rbac_violation');

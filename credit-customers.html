@@ -90,9 +90,9 @@
         .menu-card p { font-size: 13px; color: #777; line-height: 1.5; }
         
         /* Modals */
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(4px); }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(4px); padding: 12px; box-sizing: border-box; }
         .modal.active { display: flex; animation: fadeIn 0.2s; }
-        .modal-content { background: white; padding: 30px; border-radius: 20px; width: 450px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); }
+        .modal-content { background: white; padding: 30px; border-radius: 20px; width: 450px; max-width: 95%; max-height: 90vh; max-height: 90dvh; overflow-y: auto; box-sizing: border-box; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); }
         .modal h3 { margin-bottom: 20px; color: var(--primary-color); font-size: 20px; }
         .form-group { margin-bottom: 20px; }
         .form-group label { display: block; margin-bottom: 8px; font-size: 13px; font-weight: 600; color: #475569; }
@@ -140,11 +140,14 @@
         @media (max-width: 992px) {
             .sidebar { transform: translateX(-100%); z-index: 1000; transition: transform 0.3s ease; box-shadow: 5px 0 15px rgba(0,0,0,0.1); }
             .sidebar.active { transform: translateX(0); }
-            .main-content { margin-left: 0; padding: 20px; padding-top: 70px; }
-            .mobile-menu-btn { display: block; }
+            .main-content { margin-left: 0; padding: 20px 16px; padding-top: 72px; }
             .overlay.active { display: block; }
             .search-container { flex-direction: column; align-items: stretch; }
             .menu-grid { grid-template-columns: 1fr; }
+            .modal-content { width: 100% !important; max-width: 100% !important; padding: 20px 16px !important; border-radius: 14px !important; }
+            .modal-actions { flex-wrap: wrap !important; gap: 8px !important; }
+            .modal-actions button, .modal-actions .btn-save, .modal-actions .btn-cancel { flex: 1 1 calc(50% - 6px) !important; min-height: 42px !important; }
+            .client-modal-actions-grid { grid-template-columns: 1fr !important; gap: 10px !important; }
             footer { margin-left: 0; }
 
             /* Clients card-table layout */
@@ -191,7 +194,15 @@
     <link rel="stylesheet" href="sidebar.css">
 </head>
 <body>
-    <button class="mobile-menu-btn" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+    <header class="mobile-header-bar" id="mobileHeaderBar">
+        <button type="button" class="mobile-header-btn" id="mobileHeaderToggle" onclick="toggleSidebar()" aria-label="Toggle navigation">
+            <i class="fas fa-bars"></i>
+        </button>
+        <div class="mobile-header-title" id="mobileHeaderTitle">Credit Customers</div>
+        <div class="mobile-header-brand">
+            <img src="logo.png" alt="Legacy Insights Logo">
+        </div>
+    </header>
     <div class="overlay" onclick="toggleSidebar()"></div>
 
     <div class="sidebar">
@@ -428,7 +439,7 @@
             </div>
 
             <!-- Action Buttons -->
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+            <div class="client-modal-actions-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
                 <button id="viewBtnPay" class="btn-icon btn-pay" style="width:100%; height:auto; padding: 15px; border-radius: 10px; justify-content: center; gap: 10px; font-size: 14px; font-weight: 600;"><i class="fas fa-money-bill-wave"></i> Record Payment</button>
                 <button id="viewBtnLimit" class="btn-icon btn-limit" style="width:100%; height:auto; padding: 15px; border-radius: 10px; justify-content: center; gap: 10px; font-size: 14px; font-weight: 600;"><i class="fas fa-sliders-h"></i> Adjust Limit</button>
                 <button id="viewBtnStmt" class="btn-icon btn-stmt" style="width:100%; height:auto; padding: 15px; border-radius: 10px; justify-content: center; gap: 10px; font-size: 14px; font-weight: 600;"><i class="fas fa-file-invoice"></i> Statement</button>

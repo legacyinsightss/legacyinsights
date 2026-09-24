@@ -258,15 +258,22 @@
             .main-content {
                 margin-left: 0;
                 padding: 20px 16px;
-                padding-top: 64px;
+                padding-top: 72px;
             }
 
             .form-grid {
                 grid-template-columns: 1fr;
             }
 
-            .mobile-menu-btn {
-                display: block;
+            .action-bar {
+                width: 100%;
+            }
+
+            .action-bar .btn-save {
+                width: 100%;
+                justify-content: center;
+                height: 46px;
+                font-size: 15px;
             }
 
             .overlay.active {
@@ -280,7 +287,15 @@
 </head>
 
 <body>
-    <button class="mobile-menu-btn" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+    <header class="mobile-header-bar" id="mobileHeaderBar">
+        <button type="button" class="mobile-header-btn" id="mobileHeaderToggle" onclick="toggleSidebar()" aria-label="Toggle navigation">
+            <i class="fas fa-bars"></i>
+        </button>
+        <div class="mobile-header-title" id="mobileHeaderTitle">Settings</div>
+        <div class="mobile-header-brand">
+            <img src="logo.png" alt="Legacy Insights Logo">
+        </div>
+    </header>
     <div class="overlay" onclick="toggleSidebar()"></div>
 
     <div id="notification" class="notification"></div>

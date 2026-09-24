@@ -285,7 +285,15 @@
     </style>
 </head>
 <body>
-    <button class="mobile-menu-btn" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+    <header class="mobile-header-bar" id="mobileHeaderBar">
+        <button type="button" class="mobile-header-btn" id="mobileHeaderToggle" onclick="toggleSidebar()" aria-label="Toggle navigation">
+            <i class="fas fa-bars"></i>
+        </button>
+        <div class="mobile-header-title" id="mobileHeaderTitle">Dashboard</div>
+        <div class="mobile-header-brand">
+            <img src="logo.png" alt="Legacy Insights Logo">
+        </div>
+    </header>
     <div class="overlay" onclick="toggleSidebar()"></div>
 
     <!-- Sidebar -->

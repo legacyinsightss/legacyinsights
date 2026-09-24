@@ -46,15 +46,15 @@
         .btn-delete { color: var(--secondary-color); }
 
         /* Modal */
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; z-index: 1000; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; z-index: 1000; padding: 12px; box-sizing: border-box; }
         .modal.active { display: flex; }
-        .modal-content { background: white; padding: 30px; border-radius: 12px; width: 500px; }
+        .modal-content { background: white; padding: 30px; border-radius: 12px; width: 500px; max-width: 95%; max-height: 90vh; max-height: 90dvh; overflow-y: auto; box-sizing: border-box; }
         .form-group { margin-bottom: 15px; }
-        .form-group label { display: block; margin-bottom: 5px; font-size: 14px; color: #666; }
-        .form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; }
+        .form-group label { display: block; margin-bottom: 5px; font-size: 14px; color: #666; font-weight: 500; }
+        .form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
         .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
-        .btn-cancel { background: #eee; color: #333; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; }
-        .btn-save { background: var(--primary-color); color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; }
+        .btn-cancel { background: #eee; color: #333; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: 500; }
+        .btn-save { background: var(--primary-color); color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: 600; }
 
         /* Footer */
         footer {
@@ -83,14 +83,18 @@
         }
         .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999; }
 
-        @media (max-width: 768px) {
+        @media (max-width: 992px) {
             .sidebar { transform: translateX(-100%); z-index: 1000; transition: transform 0.3s ease; }
             .sidebar.active { transform: translateX(0); }
-            .main-content { margin-left: 0; padding: 20px; padding-top: 70px; }
-            .mobile-menu-btn { display: block; }
+            .main-content { margin-left: 0; padding: 20px 16px; padding-top: 72px; }
             .overlay.active { display: block; }
             .location-grid { grid-template-columns: 1fr; }
-            .modal-content { width: 95%; }
+            .modal-content { width: 100% !important; max-width: 100% !important; padding: 20px 16px !important; }
+            .modal-actions { flex-wrap: wrap !important; gap: 8px !important; }
+            .modal-actions button, .modal-actions .btn-save, .modal-actions .btn-cancel { flex: 1 1 calc(50% - 6px) !important; min-height: 42px !important; }
+        }
+        @media (max-width: 480px) {
+            .modal-actions button { width: 100% !important; flex: 1 1 100% !important; }
         }
     .user-profile-row { display: flex; align-items: center; gap: 10px; }
         
@@ -102,7 +106,15 @@
     <link rel="stylesheet" href="sidebar.css">
 </head>
 <body>
-    <button class="mobile-menu-btn" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+    <header class="mobile-header-bar" id="mobileHeaderBar">
+        <button type="button" class="mobile-header-btn" id="mobileHeaderToggle" onclick="toggleSidebar()" aria-label="Toggle navigation">
+            <i class="fas fa-bars"></i>
+        </button>
+        <div class="mobile-header-title" id="mobileHeaderTitle">Locations</div>
+        <div class="mobile-header-brand">
+            <img src="logo.png" alt="Legacy Insights Logo">
+        </div>
+    </header>
     <div class="overlay" onclick="toggleSidebar()"></div>
 
     <div class="sidebar">

@@ -86,13 +86,32 @@
         /* Confirmation Modal */
         .modal { 
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: rgba(0,0,0,0.5); align-items: center; justify-content: center; z-index: 1000; 
+            background: rgba(0,0,0,0.5); align-items: center; justify-content: center; z-index: 1000; padding: 12px; box-sizing: border-box;
         }
         .modal.active { display: flex; }
-        .modal-content { background: white; padding: 30px; border-radius: 12px; width: 400px; text-align: center; }
-        .modal-actions { display: flex; justify-content: center; gap: 10px; margin-top: 20px; }
-        .btn-cancel { background: #eee; color: #333; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: 600; }
-        .btn-confirm { background: var(--secondary-color); color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: 600; }
+        .modal-content { background: white; padding: 25px 20px; border-radius: 12px; width: 100%; max-width: 420px; text-align: center; box-sizing: border-box; }
+        .modal-actions { display: flex; justify-content: center; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
+        .btn-cancel { background: #eee; color: #333; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: 600; min-height: 42px; }
+        .btn-confirm { background: var(--secondary-color); color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: 600; min-height: 42px; }
+
+        .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999; }
+        .overlay.active { display: block; }
+
+        @media (max-width: 992px) {
+            .sidebar { transform: translateX(-100%); z-index: 1000; transition: transform 0.3s ease; box-shadow: 5px 0 15px rgba(0,0,0,0.1); }
+            .sidebar.active { transform: translateX(0); }
+            .main-content { margin-left: 0; padding: 20px 16px; padding-top: 72px; }
+            .grid-container { grid-template-columns: 1fr; gap: 20px; }
+            .filter-bar { flex-direction: column; align-items: stretch; gap: 12px; }
+            .filter-bar button { width: 100% !important; }
+            .card { padding: 18px 16px; border-radius: 12px; }
+            table { display: block; overflow-x: auto; width: 100%; }
+        }
+
+        @media (max-width: 480px) {
+            .modal-actions button { width: 100% !important; }
+        }
+        
     .user-profile-row { display: flex; align-items: center; gap: 10px; }
         
         .sidebar-logout-btn { margin-left: auto; flex-shrink: 0; background: none; border: none; color: rgba(255,255,255,0.65); cursor: pointer; padding: 7px; border-radius: 6px; font-size: 16px; line-height: 1; transition: color 0.2s ease, background 0.2s ease; } .sidebar-logout-btn:hover { color: white; background: rgba(220,53,69,0.6); }
@@ -103,6 +122,16 @@
     <link rel="stylesheet" href="sidebar.css">
 </head>
 <body>
+    <header class="mobile-header-bar" id="mobileHeaderBar">
+        <button type="button" class="mobile-header-btn" id="mobileHeaderToggle" onclick="toggleSidebar()" aria-label="Toggle navigation">
+            <i class="fas fa-bars"></i>
+        </button>
+        <div class="mobile-header-title" id="mobileHeaderTitle">Tax Management</div>
+        <div class="mobile-header-brand">
+            <img src="logo.png" alt="Legacy Insights Logo">
+        </div>
+    </header>
+    <div class="overlay" onclick="toggleSidebar()"></div>
     <div class="sidebar">
         <div class="brand">
             <img src="logo.png" alt="Legacy Insights">
@@ -211,6 +240,13 @@
     </div>
 
     <script>
+        function toggleSidebar() {
+            const sb = document.querySelector('.sidebar');
+            const ov = document.querySelector('.overlay');
+            if (sb) sb.classList.toggle('active');
+            if (ov) ov.classList.toggle('active');
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             loadTaxes();
             loadBranches();

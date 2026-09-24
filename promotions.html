@@ -73,11 +73,12 @@
         @media (max-width: 992px) {
             .sidebar { transform: translateX(-100%); z-index: 1000; transition: transform 0.3s ease; box-shadow: 5px 0 15px rgba(0,0,0,0.1); }
             .sidebar.active { transform: translateX(0); }
-            .main-content { margin-left: 0; padding: 20px; padding-top: 70px; }
-            .mobile-menu-btn { display: block; }
+            .main-content { margin-left: 0; padding: 20px 16px; padding-top: 72px; }
             .overlay.active { display: block; }
-            .add-form { flex-direction: column; align-items: stretch; }
-            .btn-add { width: 100%; }
+            .add-form { flex-direction: column; align-items: stretch; gap: 12px; }
+            .btn-add { width: 100%; height: 42px; }
+            .modal-content { width: 100% !important; max-width: 100% !important; padding: 20px 16px !important; }
+            .modal-actions button { flex: 1 1 calc(50% - 6px); min-height: 42px; }
             footer { margin-left: 0; }
 
             /* Promo card-table layout */
@@ -144,7 +145,15 @@
     <link rel="stylesheet" href="sidebar.css">
 </head>
 <body>
-    <button class="mobile-menu-btn" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+    <header class="mobile-header-bar" id="mobileHeaderBar">
+        <button type="button" class="mobile-header-btn" id="mobileHeaderToggle" onclick="toggleSidebar()" aria-label="Toggle navigation">
+            <i class="fas fa-bars"></i>
+        </button>
+        <div class="mobile-header-title" id="mobileHeaderTitle">Promotions</div>
+        <div class="mobile-header-brand">
+            <img src="logo.png" alt="Legacy Insights Logo">
+        </div>
+    </header>
     <div class="overlay" onclick="toggleSidebar()"></div>
 
     <div id="notification" class="notification"></div>

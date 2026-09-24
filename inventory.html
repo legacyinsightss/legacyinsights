@@ -59,15 +59,24 @@
         .stock-negative { background: #ffebee; color: #b71c1c; border: 1px solid #ef9a9a; }
         
         /* Modal */
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; z-index: 1000; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; z-index: 1000; padding: 12px; box-sizing: border-box; }
         .modal.active { display: flex; }
-        .modal-content { background: white; padding: 30px; border-radius: 12px; width: 500px; max-height: 90vh; overflow-y: auto; }
+        .modal-content { background: white; padding: 30px; border-radius: 12px; width: 500px; max-width: 95%; max-height: 90vh; max-height: 90dvh; overflow-y: auto; box-sizing: border-box; }
         .form-group { margin-bottom: 15px; }
-        .form-group label { display: block; margin-bottom: 5px; font-size: 14px; color: #666; }
-        .form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; }
+        .form-group label { display: block; margin-bottom: 5px; font-size: 14px; color: #666; font-weight: 500; }
+        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
         .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
-        .btn-cancel { background: #eee; color: #333; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; }
-        .btn-save { background: var(--primary-color); color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; }
+        .btn-cancel { background: #eee; color: #333; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: 500; }
+        .btn-save { background: var(--primary-color); color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: 600; }
+
+        .product-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; }
+        .pricing-input-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+        .stock-input-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .modal-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .po-input-grid { display: grid; grid-template-columns: 3fr 1fr 1fr auto; gap: 10px; margin-bottom: 15px; align-items: end; }
+        .transfer-input-grid { display: grid; grid-template-columns: 2fr 1.5fr 1fr auto; gap: 10px; align-items: start; }
+        .modal-header-row, .transfer-header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .modal-table-scroll { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; margin-bottom: 15px; }
 
         /* Footer */
         footer {
@@ -230,7 +239,23 @@
             .mobile-menu-btn { display: block; }
             .overlay.active { display: block; }
             .inventory-menu-grid { grid-template-columns: 1fr; }
-            .modal-content { width: 95%; }
+            .modal-content { width: 100% !important; max-width: 100% !important; padding: 20px 16px !important; }
+            .product-form-grid { grid-template-columns: 1fr !important; gap: 14px !important; }
+            .pricing-input-grid { grid-template-columns: 1fr 1fr !important; gap: 10px !important; }
+            .pricing-input-grid > .form-group:nth-child(3) { grid-column: span 2 !important; }
+            .stock-input-grid { grid-template-columns: 1fr 1fr !important; gap: 10px !important; }
+            .modal-form-grid { grid-template-columns: 1fr !important; gap: 14px !important; }
+            .po-input-grid { grid-template-columns: 1fr 1fr !important; gap: 10px !important; }
+            .po-input-grid > div:first-child { grid-column: span 2 !important; }
+            .po-input-grid > div:last-child { grid-column: span 2 !important; }
+            .po-input-grid > div:last-child button { width: 100% !important; height: 42px !important; }
+            .transfer-input-grid { grid-template-columns: 1fr 1fr !important; gap: 10px !important; }
+            .transfer-input-grid > div:first-child { grid-column: span 2 !important; }
+            .transfer-input-grid > div:last-child { grid-column: span 2 !important; padding-top: 0 !important; }
+            .transfer-input-grid > div:last-child button { width: 100% !important; height: 42px !important; }
+            .modal-header-row, .transfer-header-row { flex-wrap: wrap !important; gap: 10px !important; }
+            .modal-actions { flex-wrap: wrap !important; gap: 8px !important; }
+            .modal-actions button, .modal-actions .btn-save, .modal-actions .btn-cancel { flex: 1 1 calc(50% - 6px) !important; min-height: 42px !important; }
             footer { margin-left: 0; }
 
             /* Category card-table layout */
@@ -643,6 +668,15 @@
             }
         }
 
+        @media (max-width: 480px) {
+            .pricing-input-grid { grid-template-columns: 1fr !important; gap: 8px !important; }
+            .pricing-input-grid > .form-group:nth-child(3) { grid-column: auto !important; }
+            .stock-input-grid { grid-template-columns: 1fr !important; gap: 8px !important; }
+            .modal-actions button, .modal-actions .btn-save, .modal-actions .btn-cancel { flex: 1 1 100% !important; width: 100% !important; }
+            .modal-content { padding: 18px 12px !important; border-radius: 12px !important; }
+            .stock-filter-bar { grid-template-columns: 1fr !important; }
+        }
+
         /* Search Suggestions Styles */
         .suggestions-dropdown {
             position: absolute; top: 100%; left: 0; right: 0; background: white;
@@ -662,7 +696,15 @@
         </style>
 </head>
 <body>
-    <button class="mobile-menu-btn" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+    <header class="mobile-header-bar" id="mobileHeaderBar">
+        <button type="button" class="mobile-header-btn" id="mobileHeaderToggle" onclick="toggleSidebar()" aria-label="Toggle navigation">
+            <i class="fas fa-bars"></i>
+        </button>
+        <div class="mobile-header-title" id="mobileHeaderTitle">Inventory</div>
+        <div class="mobile-header-brand">
+            <img src="logo.png" alt="Legacy Insights Logo">
+        </div>
+    </header>
     <div class="overlay" onclick="toggleSidebar()"></div>
 
     <div id="notification" class="notification"></div>
@@ -1439,7 +1481,7 @@
     <!-- Add/Edit Modal -->
     <div id="productModal" class="modal">
         <div class="modal-content" style="width: 800px; max-width: 95%;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px;">
+            <div class="modal-header-row">
                 <h3 style="margin:0;" id="modalTitle">Add New Product</h3>
                 <button type="button" id="btnToggleBulk" onclick="toggleBulkMode()" style="background:#e3f2fd; border:none; color:var(--primary-color); padding:8px 15px; border-radius:6px; cursor:pointer; font-weight:600; font-size:13px;">
                     <i class="fas fa-file-upload"></i> Bulk Upload
@@ -1473,7 +1515,7 @@
             </div>
 
             <form id="productForm" onsubmit="saveProduct(event)">
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 25px;">
+                <div class="product-form-grid">
                     <input type="hidden" id="pId">
                     <!-- Left Column -->
                     <div>
@@ -1504,7 +1546,7 @@
 
                     <!-- Right Column -->
                     <div>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
+                        <div class="pricing-input-grid">
                             <div class="form-group">
                                 <label>Cost</label>
                                 <input type="number" step="0.01" id="pCostPrice" placeholder="0.00" list="costPriceOptions" oninput="calculateSellingPrice()">
@@ -1530,7 +1572,7 @@
                             </div>
                         </div>
                         
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                        <div class="stock-input-grid">
                             <div class="form-group">
                                 <label>Current Stock</label>
                                 <input type="number" id="pStock" placeholder="0" min="0">
@@ -1591,14 +1633,14 @@
         </div>
     </div>
 
-    <!-- Category Modal -->
+    <!-- Add Category Modal -->
     <div id="categoryModal" class="modal">
         <div class="modal-content" style="width: 400px;">
             <h3>Add Category</h3>
             <form onsubmit="saveCategory(event)">
                 <div class="form-group">
                     <label>Category Name</label>
-                    <input type="text" id="catName" required placeholder="e.g. Beverages">
+                    <input type="text" id="catName" required placeholder="e.g. Building Materials">
                 </div>
                 <div class="form-group">
                     <label>Description</label>
@@ -1633,7 +1675,7 @@
                 <strong>PO #<span id="recvPOId"></span></strong> - <span id="recvPOSupplier"></span>
             </div>
             
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; padding: 15px; background: #f9f9f9; border-radius: 8px;">
+            <div class="modal-form-grid" style="margin-bottom: 15px; padding: 15px; background: #f9f9f9; border-radius: 8px;">
                 <div class="form-group" style="margin-bottom: 0;">
                     <label>Supplier Invoice Number</label>
                     <input type="text" id="recvInvoiceNo" placeholder="e.g. INV-2025-001" style="background: white;">
@@ -1644,18 +1686,20 @@
                 </div>
             </div>
 
-            <table style="width:100%; border-collapse:collapse; font-size:13px;">
-                <thead>
-                    <tr style="background:#eee;">
-                        <th style="padding:10px; text-align:left;">Product</th>
-                        <th style="padding:10px; text-align:center;">Qty Ordered</th>
-                        <th style="padding:10px; text-align:center;">Qty Received</th>
-                        <th style="padding:10px; text-align:left;">Batch Number</th>
-                        <th style="padding:10px; text-align:left;">Expiry Date</th>
-                    </tr>
-                </thead>
-                <tbody id="recvItemsBody"></tbody>
-            </table>
+            <div class="modal-table-scroll">
+                <table style="width:100%; border-collapse:collapse; font-size:13px; min-width: 500px;">
+                    <thead>
+                        <tr style="background:#eee;">
+                            <th style="padding:10px; text-align:left;">Product</th>
+                            <th style="padding:10px; text-align:center;">Qty Ordered</th>
+                            <th style="padding:10px; text-align:center;">Qty Received</th>
+                            <th style="padding:10px; text-align:left;">Batch Number</th>
+                            <th style="padding:10px; text-align:left;">Expiry Date</th>
+                        </tr>
+                    </thead>
+                    <tbody id="recvItemsBody"></tbody>
+                </table>
+            </div>
 
             <div class="modal-actions">
                 <button type="button" class="btn-cancel" onclick="document.getElementById('receiveGoodsModal').classList.remove('active')">Cancel</button>
@@ -1667,8 +1711,8 @@
     <!-- PO Modal -->
     <div id="poModal" class="modal">
         <div class="modal-content" style="width: 700px; max-width: 95%;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-                <h3>Create Purchase Order</h3>
+            <div class="modal-header-row">
+                <h3 style="margin:0;">Create Purchase Order</h3>
                 <span style="font-size:12px; color:#666;" id="poDateDisplay"></span>
             </div>
             
@@ -1682,7 +1726,7 @@
                     <label style="font-size:13px; font-weight:600; color:#555; display:block; margin-bottom:10px;">Order Items</label>
                     
                     <!-- Input Row -->
-                    <div style="display:grid; grid-template-columns: 3fr 1fr 1fr auto; gap:10px; margin-bottom:15px;">
+                    <div class="po-input-grid">
                         <div>
                             <select id="poProduct" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:4px;">
                                 <option value="">Select Product</option>
@@ -1696,26 +1740,28 @@
                         </div>
                         <div>
                             <button type="button" onclick="addPOItem()" style="background:var(--primary-color); color:white; border:none; padding:8px 15px; border-radius:4px; cursor:pointer;">
-                                <i class="fas fa-plus"></i>
+                                <i class="fas fa-plus"></i> Add
                             </button>
                         </div>
                     </div>
 
                     <!-- Items Table -->
-                    <table style="width:100%; border-collapse:collapse; font-size:13px; background:white; border:1px solid #eee;">
-                        <thead style="background:#eee;">
-                            <tr>
-                                <th style="padding:8px; text-align:left;">Product</th>
-                                <th style="padding:8px; text-align:center; width:80px;">Qty</th>
-                                <th style="padding:8px; text-align:right; width:100px;">Unit Cost</th>
-                                <th style="padding:8px; text-align:right; width:100px;">Total</th>
-                                <th style="padding:8px; text-align:center; width:50px;"></th>
-                            </tr>
-                        </thead>
-                        <tbody id="poItemsTableBody">
-                            <!-- Items go here -->
-                        </tbody>
-                    </table>
+                    <div class="modal-table-scroll">
+                        <table style="width:100%; border-collapse:collapse; font-size:13px; background:white; border:1px solid #eee; min-width: 450px;">
+                            <thead style="background:#eee;">
+                                <tr>
+                                    <th style="padding:8px; text-align:left;">Product</th>
+                                    <th style="padding:8px; text-align:center; width:80px;">Qty</th>
+                                    <th style="padding:8px; text-align:right; width:100px;">Unit Cost</th>
+                                    <th style="padding:8px; text-align:right; width:100px;">Total</th>
+                                    <th style="padding:8px; text-align:center; width:50px;"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="poItemsTableBody">
+                                <!-- Items go here -->
+                            </tbody>
+                        </table>
+                    </div>
                     <div id="poEmptyState" style="text-align:center; padding:20px; color:#999; font-size:13px;">No items added yet.</div>
                 </div>
 
@@ -1744,23 +1790,25 @@
                 <strong>Date:</strong> <span id="viewPODate"></span><br>
                 <strong>Status:</strong> <span id="viewPOStatus"></span>
             </div>
-            <table style="width:100%; border-collapse:collapse; font-size:13px;">
-                <thead>
-                    <tr style="background:#f5f5f5; border-bottom:1px solid #ddd;">
-                        <th style="padding:8px; text-align:left;">Product</th>
-                        <th style="padding:8px; text-align:center;">Qty</th>
-                        <th style="padding:8px; text-align:right;">Cost</th>
-                        <th style="padding:8px; text-align:right;">Total</th>
-                    </tr>
-                </thead>
-                <tbody id="viewPOItems"></tbody>
-                <tfoot>
-                    <tr style="border-top:2px solid #ddd;">
-                        <td colspan="3" style="text-align:right; padding:10px; font-weight:bold;">Total Amount:</td>
-                        <td style="text-align:right; padding:10px; font-weight:bold;" id="viewPOTotal"></td>
-                    </tr>
-                </tfoot>
-            </table>
+            <div class="modal-table-scroll">
+                <table style="width:100%; border-collapse:collapse; font-size:13px; min-width: 400px;">
+                    <thead>
+                        <tr style="background:#f5f5f5; border-bottom:1px solid #ddd;">
+                            <th style="padding:8px; text-align:left;">Product</th>
+                            <th style="padding:8px; text-align:center;">Qty</th>
+                            <th style="padding:8px; text-align:right;">Cost</th>
+                            <th style="padding:8px; text-align:right;">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody id="viewPOItems"></tbody>
+                    <tfoot>
+                        <tr style="border-top:2px solid #ddd;">
+                            <td colspan="3" style="text-align:right; padding:10px; font-weight:bold;">Total Amount:</td>
+                            <td style="text-align:right; padding:10px; font-weight:bold;" id="viewPOTotal"></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
             <div class="modal-actions">
                 <button class="btn-cancel" onclick="document.getElementById('viewPOModal').classList.remove('active')">Close</button>
             </div>
@@ -1769,10 +1817,10 @@
 
     <!-- Transfer Modal -->
     <div id="transferModal" class="modal">
-        <div class="modal-content">
-            <div style="border-bottom: 1px solid #eee; padding-bottom: 15px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+        <div class="modal-content" style="width: 700px; max-width: 95%;">
+            <div class="transfer-header-row" style="border-bottom: 1px solid #eee; padding-bottom: 15px; margin-bottom: 20px;">
                 <h3 style="margin: 0; color: var(--primary-color);">New Stock Transfer</h3>
-                <div style="display: flex; gap: 8px;">
+                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
                     <button type="button" onclick="downloadTransferTemplate()" class="btn-header-secondary" style="padding: 6px 12px; font-size: 12px; height: 32px;"><i class="fas fa-download"></i> Template</button>
                     <button type="button" onclick="document.getElementById('transferBulkInput').click()" class="btn-header-secondary" style="padding: 6px 12px; font-size: 12px; height: 32px; background: #e3f2fd; color: var(--primary-color); border-color: #bbdefb;"><i class="fas fa-file-upload"></i> Bulk Upload</button>
                     <input type="file" id="transferBulkInput" accept=".xlsx, .xls, .csv" style="display: none;" onchange="handleTransferBulkFile(this)">
@@ -1780,13 +1828,13 @@
             </div>
 
             <form onsubmit="createTransfer(event)">
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
-                    <div class="form-group">
+                <div class="modal-form-grid" style="margin-bottom: 20px;">
+                    <div class="form-group" style="margin-bottom: 0;">
                         <label style="font-weight: 600; color: #555;">From (Your Location)</label>
                         <input type="text" id="trFromDisplay" readonly style="background: #f5f5f5; color: #333; font-weight: 600; cursor: not-allowed;">
                         <input type="hidden" id="trFrom">
                     </div>
-                    <div class="form-group">
+                    <div class="form-group" style="margin-bottom: 0;">
                         <label style="font-weight: 600; color: #555;">To (Destination)</label>
                         <select id="trTo" required style="border-color: var(--primary-color);"></select>
                     </div>
@@ -1801,7 +1849,7 @@
                     <label style="font-size: 14px; font-weight: 700; color: #333; display: block; margin-bottom: 15px;">Add Items to Transfer</label>
                     
                     <!-- Input Row -->
-                    <div style="display: grid; grid-template-columns: 2fr 1.5fr 1fr auto; gap: 10px; align-items: start;">
+                    <div class="transfer-input-grid">
                         <div class="form-group" style="margin-bottom: 0; position: relative;">
                             <label style="font-size: 12px; margin-bottom: 4px;">Product Search</label>
                             <div style="display: flex; gap: 5px;">
@@ -1821,17 +1869,17 @@
                             <label style="font-size: 12px; margin-bottom: 4px;">Quantity</label>
                             <input type="number" id="transferQty" placeholder="0" min="1" style="width: 100%;">
                         </div>
-                        <div style="padding-top: 22px;">
-                            <button type="button" onclick="addTransferItem()" style="background: var(--primary-color); color: white; border: none; width: 36px; height: 36px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.2s;">
-                                <i class="fas fa-plus"></i>
+                        <div>
+                            <button type="button" onclick="addTransferItem()" style="background: var(--primary-color); color: white; border: none; width: 100%; height: 38px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.2s; font-size: 13px; font-weight: 600; gap: 5px;">
+                                <i class="fas fa-plus"></i> Add
                             </button>
                         </div>
                     </div>
                 </div>
 
                 <!-- Items Table -->
-                <div style="border: 1px solid #eee; border-radius: 8px; overflow: hidden; margin-bottom: 20px;">
-                    <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+                <div class="modal-table-scroll" style="border: 1px solid #eee; border-radius: 8px; margin-bottom: 20px;">
+                    <table style="width: 100%; border-collapse: collapse; font-size: 13px; min-width: 400px;">
                         <thead style="background: #f5f5f5; color: #555;">
                             <tr>
                                 <th style="padding: 10px 15px; text-align: left; font-weight: 600;">Product</th>
@@ -1856,7 +1904,6 @@
                 </div>
             </form>
         </div>
-    </div>
     </div>
 
     <!-- View Transfer Modal -->
@@ -2132,7 +2179,9 @@
             
             // Only update title if element exists
             const titleEl = document.getElementById('pageTitle');
-            if(titleEl) titleEl.textContent = titles[tabId] || 'Inventory & Supply Chain';
+            const resolvedTitle = titles[tabId] || 'Inventory';
+            if(titleEl) titleEl.textContent = resolvedTitle;
+            if(window.setMobileHeaderTitle) window.setMobileHeaderTitle(resolvedTitle);
 
             // Load data specific to activated tab
             if (tabId === 'stock') {

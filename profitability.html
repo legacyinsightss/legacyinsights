@@ -72,11 +72,10 @@
         }
         .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999; }
 
-        @media (max-width: 768px) {
+        @media (max-width: 992px) {
             .sidebar { transform: translateX(-100%); z-index: 1000; transition: transform 0.3s ease; }
             .sidebar.active { transform: translateX(0); }
-            .main-content { margin-left: 0; padding: 20px; padding-top: 70px; }
-            .mobile-menu-btn { display: block; }
+            .main-content { margin-left: 0; padding: 20px 16px; padding-top: 72px; }
             .overlay.active { display: block; }
             .kpi-grid { grid-template-columns: 1fr; }
             footer { margin-left: 0; }
@@ -90,7 +89,15 @@
     <script src="instant-nav.js"></script>
 </head>
 <body>
-    <button class="mobile-menu-btn" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+    <header class="mobile-header-bar" id="mobileHeaderBar">
+        <button type="button" class="mobile-header-btn" id="mobileHeaderToggle" onclick="toggleSidebar()" aria-label="Toggle navigation">
+            <i class="fas fa-bars"></i>
+        </button>
+        <div class="mobile-header-title" id="mobileHeaderTitle">Profitability</div>
+        <div class="mobile-header-brand">
+            <img src="logo.png" alt="Legacy Insights Logo">
+        </div>
+    </header>
     <div class="overlay" onclick="toggleSidebar()"></div>
 
     <div class="sidebar">
