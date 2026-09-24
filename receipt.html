@@ -182,6 +182,24 @@
             color: #555;
             padding-top: 15px;
             border-top: 1px dashed #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .receipt-screen-footer {
+            margin-top: 25px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 12px;
+            font-weight: 500;
+            color: #888;
+            letter-spacing: 0.03em;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
         }
         
         .actions { 
@@ -232,7 +250,7 @@
                 padding: 15px;
                 border: none;
             }
-            .actions { display: none; }
+            .actions, .receipt-screen-footer, footer { display: none !important; }
             @page { 
                 margin: 0; 
                 size: auto; 
@@ -331,8 +349,9 @@
         </div>
 
         <div class="footer">
-            <p id="rFooter">Thank you for shopping with us</p>
-            <p style="font-size:9px; margin-top:5px;">Kindly check receipt & items purchased before exit<br>Developed by Whitsun (030 701 0806)</p>
+            <p id="rFooter" style="margin: 0; text-align: center;">Thank you for shopping with us</p>
+            <p style="font-size:9px; margin-top:5px; margin-bottom: 0; line-height: 1.4; text-align: center; color: #555;">Kindly check receipt & items purchased before exit</p>
+            <div style="font-size: 10px; font-weight: bold; margin-top: 8px; text-align: center; letter-spacing: 0.5px; color: #111;">&copy; 2026 Legacy Insights</div>
         </div>
     </div>
 
@@ -340,6 +359,10 @@
         <button class="btn btn-back" onclick="window.location.href='pos'">Back to POS</button>
         <button class="btn btn-print" onclick="window.print()">Print Receipt</button>
     </div>
+
+    <footer class="receipt-screen-footer">
+        &copy; 2026 Legacy Insights
+    </footer>
 
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
