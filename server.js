@@ -1755,7 +1755,10 @@ app.get('/api/users', authenticateToken, async (req, res) => {
         `;
         const params = [];
 
-        if (req.user.role !== 'admin' && req.user.role !== 'ceo' && req.user.store_location) {
+        // If the requester is a manager, never show CEO or Admin accounts in user management
+        if (req.user.role === 'manager' || req.user.role === 'store_manager') {
+            query += ` AND LOWER(role) NOT IN ('ceo', 'admin')`;
+        } else if (req.user.role !== 'admin' && req.user.role !== 'ceo' && req.user.store_location) {
             query += ` AND store_location = $1`;
             params.push(req.user.store_location);
         }
@@ -1777,6 +1780,11 @@ app.post('/api/users', authenticateToken, async (req, res) => {
     try {
         const userRole = req.user.role;
         if (userRole !== 'admin' && userRole !== 'manager' && userRole !== 'ceo') return res.status(403).json({ message: 'Unauthorized' });
+
+        // Managers cannot create CEO or Administrator accounts
+        if ((userRole === 'manager' || userRole === 'store_manager') && (role.toLowerCase() === 'ceo' || role.toLowerCase() === 'admin')) {
+            return res.status(403).json({ message: 'Managers cannot create CEO or Administrator accounts' });
+        }
 
         // Resolve store_id from branches table to ensure correct settings/VAT linkage
         let storeId = null;
@@ -1816,6 +1824,15 @@ app.put('/api/users/:id', authenticateToken, async (req, res) => {
     const { fullName, username, email, phone, role, store, status } = req.body;
 
     try {
+        // Prevent managers from modifying CEO or Admin accounts
+        const targetRes = await pool.query('SELECT role FROM users WHERE id = $1', [id]);
+        if (targetRes.rows.length > 0) {
+            const targetRole = (targetRes.rows[0].role || '').toLowerCase();
+            if ((userRole === 'manager' || userRole === 'store_manager') && (targetRole === 'ceo' || targetRole === 'admin')) {
+                return res.status(403).json({ message: 'Managers cannot modify executive accounts' });
+            }
+        }
+
         // Resolve store_id
         let storeId = null;
         if (store) {
@@ -1831,11 +1848,12 @@ app.put('/api/users/:id', authenticateToken, async (req, res) => {
         const dbUsername = username && username.trim() !== '' ? username.trim() : null;
         const dbPhone = phone && phone.trim() !== '' ? phone.trim() : null;
 
+        const finalRole = (role || targetRes.rows[0]?.role || 'staff').toLowerCase();
         await pool.query(`
             UPDATE users 
             SET name = $1, username = $2, email = $3, phone = $4, role = $5, store_location = $6, store_id = $7, status = $8
             WHERE id = $9
-        `, [fullName, dbUsername, email, dbPhone, role.toLowerCase(), store, storeId, status, id]);
+        `, [fullName, dbUsername, email, dbPhone, finalRole, store, storeId, status, id]);
 
         let action = 'UPDATE_USER';
         if (status && currentStatus !== status) {
@@ -1858,7 +1876,16 @@ app.put('/api/users/:id', authenticateToken, async (req, res) => {
 // Delete user (Permanent delete)
 app.delete('/api/users/:id', authenticateToken, async (req, res) => {
     const { id } = req.params;
+    const userRole = req.user.role;
     try {
+        // Prevent managers from deleting CEO or Admin accounts
+        const targetRes = await pool.query('SELECT role FROM users WHERE id = $1', [id]);
+        if (targetRes.rows.length > 0) {
+            const targetRole = (targetRes.rows[0].role || '').toLowerCase();
+            if ((userRole === 'manager' || userRole === 'store_manager') && (targetRole === 'ceo' || targetRole === 'admin')) {
+                return res.status(403).json({ message: 'Managers cannot delete executive accounts' });
+            }
+        }
         // Soft delete: mark as deleted, revoke access — record kept for data retention
         await pool.query(
             "UPDATE users SET deleted_at = NOW(), status = 'Deleted' WHERE id = $1",
@@ -1876,8 +1903,17 @@ app.delete('/api/users/:id', authenticateToken, async (req, res) => {
 app.post('/api/users/:id/reset-password', authenticateToken, async (req, res) => {
     const { id } = req.params;
     const { password } = req.body;
+    const userRole = req.user.role;
 
     try {
+        // Prevent managers from resetting CEO or Admin passwords
+        const targetRes = await pool.query('SELECT role FROM users WHERE id = $1', [id]);
+        if (targetRes.rows.length > 0) {
+            const targetRole = (targetRes.rows[0].role || '').toLowerCase();
+            if ((userRole === 'manager' || userRole === 'store_manager') && (targetRole === 'ceo' || targetRole === 'admin')) {
+                return res.status(403).json({ message: 'Managers cannot reset executive passwords' });
+            }
+        }
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
 

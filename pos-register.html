@@ -983,18 +983,49 @@
             updatePaginationControls();
         }
 
+        function applyManagerRestrictions() {
+            let currentRole = '';
+            try {
+                const u = JSON.parse(localStorage.getItem('currentUser') || '{}');
+                currentRole = (u.role || '').toLowerCase();
+            } catch (e) {}
+            const isManager = currentRole === 'manager' || currentRole === 'store_manager';
+            if (isManager) {
+                // Remove admin and ceo options from all role dropdowns so managers cannot create or assign executive roles
+                ['role', 'editRole', 'roleFilter'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) {
+                        const adminOpt = el.querySelector('option[value="admin"]');
+                        if (adminOpt) adminOpt.remove();
+                        const ceoOpt = el.querySelector('option[value="ceo"]');
+                        if (ceoOpt) ceoOpt.remove();
+                    }
+                });
+            }
+        }
+
         // Filter users
         function filterUsers() {
+            let currentRole = '';
+            try {
+                const u = JSON.parse(localStorage.getItem('currentUser') || '{}');
+                currentRole = (u.role || '').toLowerCase();
+            } catch (e) {}
+            const isManager = currentRole === 'manager' || currentRole === 'store_manager';
+
             const searchTerm = document.getElementById('userSearch').value.toLowerCase();
             const roleFilter = document.getElementById('roleFilter').value;
 
             filteredUsers = users.filter(user => {
                 if (user.status === 'Deleted') return false;
 
+                const role = (user.role || '').toLowerCase();
+                // Never show CEO or Admin accounts to managers in Manage Existing Users
+                if (isManager && (role === 'ceo' || role === 'admin')) return false;
+
                 const username = (user.username || '').toLowerCase();
                 const fullName = (user.fullName || '').toLowerCase();
                 const employeeId = (user.employeeId || '').toLowerCase();
-                const role = (user.role || '').toLowerCase();
                 
                 const matchesSearch = username.includes(searchTerm) || 
                                      fullName.includes(searchTerm) || 
@@ -1201,6 +1232,7 @@
 
         // Initialize on page load
         document.addEventListener('DOMContentLoaded', () => {
+            applyManagerRestrictions();
             loadUsers();
             
             // Handle URL parameters for tabs
