@@ -241,11 +241,11 @@
     <div class="receipt-container">
         <div class="header">
             <div class="store-logo">
-                <img src="logo.png" alt="Store Logo" style="width: 38px; height: 38px; border-radius: 50%; object-fit: cover; border: 1.5px solid #e5a824;">
+                <img src="logo.png" alt="Store Logo" style="width: 46px; height: 46px; border-radius: 50%; object-fit: cover; border: 1.5px solid #e5a824;">
             </div>
-            
-            <div class="store-info" id="rAddress">Stadium Road, Amasaman</div>
-            <div class="store-info" id="rPhone">Tel: +233 24 512 2959</div>
+            <div class="store-name" id="rStoreName">LEGACY INSIGHTS</div>
+            <div class="store-info" id="rAddress">Asa Adi On Ashalaja Hobor Rd</div>
+            <div class="store-info" id="rPhone">Tel: 0555195277 / 0533818390</div>
         </div>
 
 
@@ -348,11 +348,13 @@
             try {
                 const token = localStorage.getItem('authToken') || localStorage.getItem('companyToken');
                 
-                // 1. Fetch Settings (for Store Name/Footer)
+                // 1. Fetch Settings (for Store Name/Address/Phone/Footer)
                 const settingsRes = await fetch('/api/settings', { headers: { 'Authorization': `Bearer ${token}` } });
                 if(settingsRes.ok) {
                     const settings = await settingsRes.json();
-                    // if(settings.store_name) document.getElementById('rStoreName').textContent = settings.store_name;
+                    if(settings.store_name) document.getElementById('rStoreName').textContent = settings.store_name;
+                    if(settings.address) document.getElementById('rAddress').textContent = settings.address;
+                    if(settings.phone) document.getElementById('rPhone').textContent = 'Tel: ' + settings.phone;
                     if(settings.receipt_footer) document.getElementById('rFooter').textContent = settings.receipt_footer;
                 }
 
@@ -367,13 +369,13 @@
                 document.getElementById('rDate').textContent = date.toLocaleString();
                 const receiptNumber = data.receipt_number || data.id;
                 let cashierName = data.cashier_name || 'Staff';
-                if (cashierName === 'Chief Executive Officer') cashierName = 'Amasaman';
+                if (cashierName === 'Chief Executive Officer') cashierName = 'Cecil Mac Ben Amoah';
                 document.getElementById('rCashier').textContent = cashierName;
                 
-                // Set branch address from transaction data
-                if(data.branch_name) {
-                    document.getElementById('rAddress').textContent = data.branch_name;
-                } else if(data.store_location) {
+                // Set branch address if custom branch provided
+                if(data.branch_address) {
+                    document.getElementById('rAddress').textContent = data.branch_address;
+                } else if(data.store_location && data.store_location !== 'Main Warehouse' && data.store_location !== 'Amasaman') {
                     document.getElementById('rAddress').textContent = data.store_location;
                 }
                 

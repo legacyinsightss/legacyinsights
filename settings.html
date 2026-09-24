@@ -334,12 +334,16 @@
                 <div class="form-grid">
                     <div class="form-group">
                         <label for="storeName">Store Name</label>
-                        <input type="text" id="storeName" placeholder="Legacy Insights" required>
+                        <input type="text" id="storeName" placeholder="LEGACY INSIGHTS" required>
                     </div>
                     <div class="form-group">
                         <label for="phone">Support Phone</label>
-                        <input type="text" id="phone" placeholder="+233 24 000 0000">
+                        <input type="text" id="phone" placeholder="0555195277 / 0533818390">
                     </div>
+                </div>
+                <div class="form-group">
+                    <label for="address">Store Location / Address</label>
+                    <input type="text" id="address" placeholder="Asa Adi On Ashalaja Hobor Rd">
                 </div>
                 <div class="form-group">
                     <label for="taxId">Tax Identification Number (TIN)</label>
@@ -416,6 +420,7 @@
             if (settings.receipt_footer !== undefined) document.getElementById('receiptFooter').value = settings.receipt_footer || '';
             if (settings.tax_id !== undefined && document.getElementById('taxId')) document.getElementById('taxId').value = settings.tax_id || '';
             if (settings.phone !== undefined && document.getElementById('phone')) document.getElementById('phone').value = settings.phone || '';
+            if (settings.address !== undefined && document.getElementById('address')) document.getElementById('address').value = settings.address || '';
             if (settings.monthly_target !== undefined && document.getElementById('monthlyTarget')) document.getElementById('monthlyTarget').value = settings.monthly_target || '';
         }
 
@@ -501,6 +506,7 @@
             const settings = {
                 storeName: document.getElementById('storeName').value.trim(),
                 phone: document.getElementById('phone')?.value.trim() || '',
+                address: document.getElementById('address')?.value.trim() || '',
                 taxId: document.getElementById('taxId')?.value.trim() || '',
                 currencySymbol: document.getElementById('currencySymbol').value,
                 vatRate: parseFloat(document.getElementById('vatRate').value) || 0,
@@ -530,6 +536,7 @@
                     localStorage.setItem('posSettings', JSON.stringify({
                         store_name: settings.storeName,
                         phone: settings.phone,
+                        address: settings.address,
                         tax_id: settings.taxId,
                         currency_symbol: settings.currencySymbol,
                         vat_rate: settings.vatRate,

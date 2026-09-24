@@ -3673,8 +3673,8 @@ async function printDocument(data, type, terms = '..............................
 
     doc.setFont('times', 'normal');
     doc.setFontSize(9.5);
-    doc.text('H/NO. 49, Stadium Road, Amasaman | Phone: +233 24 512 2959', 14, 30); // Under the logo
-    doc.text('Location: Stadium Road, Amasaman, Ga West, Greater Accra.', 14, 34); // Under the logo
+    doc.text('Asa Adi On Ashalaja Hobor Rd | Phone: 0555195277 / 0533818390', 14, 30); // Under the logo
+    doc.text('Location: Asa Adi On Ashalaja Hobor Rd', 14, 34); // Under the logo
 
     // Invoice details (right side)
     doc.setFontSize(10);
@@ -3689,9 +3689,9 @@ async function printDocument(data, type, terms = '..............................
     // Document type
     doc.setFontSize(14);
     doc.setFont('times', 'bold');
-    doc.setTextColor(178, 31, 31); // Red color
+    doc.setTextColor(217, 119, 6); // Brand Gold / Amber
     doc.text(type === 'PROFORMA' ? 'PRO FORMA INVOICE' : 'SALES RECEIPT', 105, 47.5, { align: 'center' });
-    doc.setDrawColor(178, 31, 31); // Red color
+    doc.setDrawColor(217, 119, 6); // Brand Gold / Amber
     doc.setLineWidth(0.5);
     doc.line(14, 42, 196, 42); // Top line
     doc.line(14, 51, 196, 51); // Bottom line

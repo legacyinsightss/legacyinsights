@@ -6172,7 +6172,7 @@ app.post('/api/settings', authenticateToken, async (req, res) => {
     }
 
     const {
-        storeName, currencySymbol, vatRate, receiptFooter, taxId, phone, monthlyTarget,
+        storeName, address, currencySymbol, vatRate, receiptFooter, taxId, phone, monthlyTarget,
         bankName, bankAccountName, bankAccountNumber, bankBranch, momoNumber, momoName
     } = req.body;
     // Company portal users always manage the master settings (branch_id=1)
@@ -6180,24 +6180,25 @@ app.post('/api/settings', authenticateToken, async (req, res) => {
 
     try {
         await pool.query(`
-            INSERT INTO system_settings (id, branch_id, store_name, currency_symbol, vat_rate, receipt_footer, tax_id, phone, monthly_target, bank_name, bank_account_name, bank_account_number, bank_branch, momo_number, momo_name, updated_at)
-            VALUES ($1, $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, CURRENT_TIMESTAMP)
+            INSERT INTO system_settings (id, branch_id, store_name, address, currency_symbol, vat_rate, receipt_footer, tax_id, phone, monthly_target, bank_name, bank_account_name, bank_account_number, bank_branch, momo_number, momo_name, updated_at)
+            VALUES ($1, $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, CURRENT_TIMESTAMP)
             ON CONFLICT (id) DO UPDATE SET 
                 store_name = COALESCE($2, system_settings.store_name), 
-                currency_symbol = COALESCE($3, system_settings.currency_symbol), 
-                vat_rate = COALESCE($4, system_settings.vat_rate), 
-                receipt_footer = COALESCE($5, system_settings.receipt_footer),
-                tax_id = COALESCE($6, system_settings.tax_id),
-                phone = COALESCE($7, system_settings.phone),
-                monthly_target = COALESCE($8, system_settings.monthly_target),
-                bank_name = COALESCE($9, system_settings.bank_name),
-                bank_account_name = COALESCE($10, system_settings.bank_account_name),
-                bank_account_number = COALESCE($11, system_settings.bank_account_number),
-                bank_branch = COALESCE($12, system_settings.bank_branch),
-                momo_number = COALESCE($13, system_settings.momo_number),
-                momo_name = COALESCE($14, system_settings.momo_name),
+                address = COALESCE($3, system_settings.address),
+                currency_symbol = COALESCE($4, system_settings.currency_symbol), 
+                vat_rate = COALESCE($5, system_settings.vat_rate), 
+                receipt_footer = COALESCE($6, system_settings.receipt_footer),
+                tax_id = COALESCE($7, system_settings.tax_id),
+                phone = COALESCE($8, system_settings.phone),
+                monthly_target = COALESCE($9, system_settings.monthly_target),
+                bank_name = COALESCE($10, system_settings.bank_name),
+                bank_account_name = COALESCE($11, system_settings.bank_account_name),
+                bank_account_number = COALESCE($12, system_settings.bank_account_number),
+                bank_branch = COALESCE($13, system_settings.bank_branch),
+                momo_number = COALESCE($14, system_settings.momo_number),
+                momo_name = COALESCE($15, system_settings.momo_name),
                 updated_at = CURRENT_TIMESTAMP
-        `, [branchId, storeName || null, currencySymbol || null, vatRate || null, receiptFooter || null, taxId || null, phone || null, monthlyTarget || null, bankName || null, bankAccountName || null, bankAccountNumber || null, bankBranch || null, momoNumber || null, momoName || null]);
+        `, [branchId, storeName || null, address || null, currencySymbol || null, vatRate || null, receiptFooter || null, taxId || null, phone || null, monthlyTarget || null, bankName || null, bankAccountName || null, bankAccountNumber || null, bankBranch || null, momoNumber || null, momoName || null]);
         await logActivity(req, 'UPDATE_SETTINGS', { storeName, vatRate });
         res.json({ success: true });
     } catch (err) {
