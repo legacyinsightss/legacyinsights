@@ -423,6 +423,7 @@ async function initDb() {
             
             -- Hardware migration: Ensure track_expiry defaults to FALSE and existing hardware items do not require expiry
             ALTER TABLE products ALTER COLUMN track_expiry SET DEFAULT FALSE;
+            ALTER TABLE products ALTER COLUMN reorder_level SET DEFAULT 1;
             
             -- Add unique constraint on barcode+name combination (not just barcode)
             -- First check for and handle any existing duplicates
@@ -2725,7 +2726,7 @@ app.get('/api/products/full', authenticateToken, async (req, res) => {
 });
 
 app.post('/api/products', authenticateToken, async (req, res) => {
-    let { barcode, name, category, price, stock, cost_price, selling_unit, packaging_unit, conversion_rate, reorder_level, track_batch, track_expiry, batch_number, expiry_date } = req.body;
+    let { barcode, name, category, price, stock, cost_price, selling_unit, packaging_unit, conversion_rate, reorder_level, track_batch, track_expiry, batch_number, expiry_date, date } = req.body;
     try {
         let finalBarcode = (barcode || '').toString().trim();
         if (!finalBarcode) {
@@ -2733,6 +2734,8 @@ app.post('/api/products', authenticateToken, async (req, res) => {
         }
         barcode = finalBarcode;
         selling_unit = selling_unit || 'Unit';
+        const finalReorderLevel = parseInt(reorder_level) || 1;
+        const entryDate = date ? new Date(date) : new Date();
         // Refresh store info from DB to ensure accuracy
         const userRes = await pool.query('SELECT store_id, store_location FROM users WHERE id = $1', [req.user.id]);
         const dbUser = userRes.rows[0];
@@ -2758,12 +2761,12 @@ app.post('/api/products', authenticateToken, async (req, res) => {
                     cost_price = $6, selling_unit = $7, packaging_unit = $8,
                     conversion_rate = $9, reorder_level = $10,
                     track_batch = $11, track_expiry = $12,
-                    deleted_at = NULL
+                    deleted_at = NULL, created_at = $15
                  WHERE id = $13 AND tenant_id = $14`,
                 [name, category, price, stockValue, stockLevels,
                     cost_price || 0, selling_unit || 'Unit', packaging_unit || 'Box',
-                    conversion_rate || 1, reorder_level || 10,
-                    track_batch, track_expiry, existingId, req.user.tenant_id]
+                    conversion_rate || 1, finalReorderLevel,
+                    track_batch, track_expiry, existingId, req.user.tenant_id, entryDate]
             );
             await logActivity(req, 'RESTORE_PRODUCT', { barcode, name, stock });
             return res.json({ success: true, restored: true });
@@ -2771,24 +2774,25 @@ app.post('/api/products', authenticateToken, async (req, res) => {
 
         // Fresh INSERT — no deleted record found for this barcode
         await pool.query(
-            `INSERT INTO products (barcode, name, category, price, stock, stock_levels, cost_price, selling_unit, packaging_unit, conversion_rate, reorder_level, track_batch, track_expiry, tenant_id) 
-             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)`,
-            [barcode, name, category, price, stockValue, stockLevels, cost_price || 0, selling_unit || 'Unit', packaging_unit || 'Box', conversion_rate || 1, reorder_level || 10, track_batch ?? true, track_expiry ?? false, req.user.tenant_id]
+            `INSERT INTO products (barcode, name, category, price, stock, stock_levels, cost_price, selling_unit, packaging_unit, conversion_rate, reorder_level, track_batch, track_expiry, tenant_id, created_at) 
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)`,
+            [barcode, name, category, price, stockValue, stockLevels, cost_price || 0, selling_unit || 'Unit', packaging_unit || 'Box', conversion_rate || 1, finalReorderLevel, track_batch ?? true, track_expiry ?? false, req.user.tenant_id, entryDate]
         );
 
         // Insert Batch if stock > 0 (hardware products auto-generate batch if omitted)
         if (stockValue > 0) {
             const finalBatchNum = batch_number || `BATCH-${barcode}-${Date.now().toString().slice(-4)}`;
             await pool.query(
-                `INSERT INTO product_batches (product_barcode, batch_number, expiry_date, quantity, quantity_available, quantity_received, branch_id, status)
-                 VALUES ($1, $2, $3, $4, $4, $4, $5, 'Active')
+                `INSERT INTO product_batches (product_barcode, batch_number, expiry_date, quantity, quantity_available, quantity_received, branch_id, status, created_at)
+                 VALUES ($1, $2, $3, $4, $4, $4, $5, 'Active', $6)
                  ON CONFLICT (product_barcode, batch_number, branch_id) 
                  DO UPDATE SET 
                      expiry_date = EXCLUDED.expiry_date,
                      quantity = EXCLUDED.quantity,
                      quantity_available = EXCLUDED.quantity_available,
-                     quantity_received = EXCLUDED.quantity_received`,
-                [barcode, finalBatchNum, expiry_date || null, stockValue, branchId]
+                     quantity_received = EXCLUDED.quantity_received,
+                     updated_at = CURRENT_TIMESTAMP`,
+                [barcode, finalBatchNum, expiry_date || null, stockValue, branchId, entryDate]
             );
         }
 
@@ -3012,7 +3016,15 @@ app.post('/api/products/bulk', authenticateToken, upload.single('file'), async (
                 sellingUnit = findColumn(['sellingunit', 'unit']) || 'Unit';
                 packagingUnit = findColumn(['packagingunit', 'box', 'pack']) || sellingUnit || 'Unit';
                 conversionRate = cleanNum(findColumn(['itemsperpackage', 'conversion', 'perpackage']) || 1);
-                reorderLevel = parseInt(findColumn(['reorderlevel', 'reorder', 'threshold']) || 10);
+                reorderLevel = parseInt(findColumn(['reorderlevel', 'reorder', 'threshold']) || 1);
+
+                // Extract Stock In Date
+                const stockDate = findColumn(['date', 'stockdate', 'entrydate', 'stockindate', 'createdat']);
+                let entryDate = new Date();
+                if (stockDate) {
+                    const parsedDate = parseFlexibleDate(stockDate);
+                    if (parsedDate) entryDate = new Date(parsedDate);
+                }
 
                 // Extract Batch Information
                 batchNumber = findColumn(['batchnumber', 'batch', 'lot']).toString().trim();
@@ -3095,9 +3107,9 @@ app.post('/api/products/bulk', authenticateToken, upload.single('file'), async (
 
                     // Insert brand new product (Hardware default: track_expiry = false)
                     await pool.query(
-                        `INSERT INTO products (barcode, name, category, price, cost_price, stock, stock_levels, selling_unit, packaging_unit, conversion_rate, reorder_level, track_batch, track_expiry, tenant_id)
-                         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, true, false, $12)`,
-                        [barcode, name, category, price, cost, stock, stockLevels, sellingUnit, packagingUnit, conversionRate, reorderLevel, req.user.tenant_id]
+                        `INSERT INTO products (barcode, name, category, price, cost_price, stock, stock_levels, selling_unit, packaging_unit, conversion_rate, reorder_level, track_batch, track_expiry, tenant_id, created_at)
+                         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, true, false, $12, $13)`,
+                        [barcode, name, category, price, cost, stock, stockLevels, sellingUnit, packagingUnit, conversionRate, reorderLevel, req.user.tenant_id, entryDate]
                     );
                 }
 
@@ -3105,13 +3117,14 @@ app.post('/api/products/bulk', authenticateToken, upload.single('file'), async (
                 if (stock > 0) {
                     const finalBatch = batchNumber || `BATCH-${barcode}-${Date.now().toString().slice(-4)}`;
                     await pool.query(
-                        `INSERT INTO product_batches (product_barcode, batch_number, expiry_date, quantity, quantity_available, quantity_received, branch_id, status)
-                         VALUES ($1, $2, $3, $4, $4, $4, $5, 'Active')
+                        `INSERT INTO product_batches (product_barcode, batch_number, expiry_date, quantity, quantity_available, quantity_received, branch_id, status, created_at)
+                         VALUES ($1, $2, $3, $4, $4, $4, $5, 'Active', $6)
                          ON CONFLICT (product_barcode, batch_number, branch_id) DO UPDATE SET
                              quantity = EXCLUDED.quantity,
                              quantity_available = EXCLUDED.quantity_available,
-                             quantity_received = EXCLUDED.quantity_received`,
-                        [barcode, finalBatch, expiryDate || null, stock, branchId]
+                             quantity_received = EXCLUDED.quantity_received,
+                             updated_at = CURRENT_TIMESTAMP`,
+                        [barcode, finalBatch, expiryDate || null, stock, branchId, entryDate]
                     );
                 }
 
