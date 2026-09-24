@@ -38,18 +38,40 @@
     <link rel="stylesheet" href="sidebar.css">
 </head>
 <body>
-    <div class="container">
+    <div class="container" style="max-width: 620px;">
         <h2>📦 Bulk Stock Upload</h2>
-        <p class="description">Upload an Excel file (.xlsx, .csv) with columns:<br><strong>Product Name, Category, Cost, Markup, Price, Current Stock, Selling Unit, Reorder Level</strong></p>
+        <p class="description">Upload an Excel (.xlsx, .xls) or CSV (.csv) file with the standard inventory headers below.</p>
         
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px 16px; margin-bottom: 20px; font-size: 13px; text-align: left;">
+            <div style="font-weight: 700; color: #1e293b; margin-bottom: 8px;">📋 Supported Table Headers:</div>
+            <ul style="margin: 0; padding-left: 20px; color: #475569; line-height: 1.6;">
+                <li><strong>Product Name</strong> <span style="color:#e11d48; font-weight:600;">(Required)</span>: Name of the item</li>
+                <li><strong>Category</strong>: e.g. Building Materials, Plumbing, Tools, Electrical</li>
+                <li><strong>Cost</strong>: Purchase / cost price (e.g. <code>85.00</code>)</li>
+                <li><strong>Markup</strong>: Profit percentage (e.g. <code>25%</code>)</li>
+                <li><strong>Price</strong> <span style="color:#e11d48; font-weight:600;">(Required)</span>: Selling price (e.g. <code>110.00</code>)</li>
+                <li><strong>Current Stock</strong>: Quantity on hand to add (e.g. <code>100</code>)</li>
+                <li><strong>Selling Unit</strong>: e.g. <code>Piece</code>, <code>Bag</code>, <code>Box</code>, <code>Roll</code>, <code>Unit</code></li>
+                <li><strong>Reorder Level</strong>: Low stock threshold alert (e.g. <code>15</code>)</li>
+                <li><strong>Barcode</strong> <span style="color:#64748b;">(Optional)</span>: If blank, system auto-generates a unique barcode</li>
+            </ul>
+        </div>
+
         <div class="form-group">
-            <label>Select Excel File</label>
+            <label>Select Inventory File</label>
             <input type="file" id="fileInput" accept=".xlsx, .xls, .csv">
         </div>
         
         <div style="display:flex; flex-direction:column; gap:10px; margin-bottom: 20px;">
-            <button onclick="uploadFile()">Upload Products</button>
-            <button type="button" onclick="downloadTemplate()" style="background:#f1f5f9; color:#334155; border:1px solid #cbd5e1; font-weight:600;">📥 Download Excel Template</button>
+            <button onclick="uploadFile()">Upload Products to System</button>
+            <div style="display:flex; gap:10px;">
+                <a href="sample_bulk_upload_products.xlsx" download="sample_bulk_upload_products.xlsx" style="flex:1; text-decoration:none; display:inline-block; text-align:center; background:#f1f5f9; color:#0f172a; border:1px solid #cbd5e1; padding:10px; border-radius:8px; font-weight:600; font-size:13px; transition:0.2s;">
+                    📥 Download Excel (.xlsx)
+                </a>
+                <a href="sample_bulk_upload_products.csv" download="sample_bulk_upload_products.csv" style="flex:1; text-decoration:none; display:inline-block; text-align:center; background:#f1f5f9; color:#0f172a; border:1px solid #cbd5e1; padding:10px; border-radius:8px; font-weight:600; font-size:13px; transition:0.2s;">
+                    📥 Download CSV (.csv)
+                </a>
+            </div>
         </div>
         
         <div id="status"></div>

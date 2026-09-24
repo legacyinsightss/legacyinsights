@@ -3159,6 +3159,20 @@ app.post('/api/products/bulk', authenticateToken, upload.single('file'), async (
     }
 });
 
+// Download sample bulk upload template (Excel / CSV)
+app.get('/api/products/sample-template/:format', (req, res) => {
+    const format = (req.params.format || '').toLowerCase();
+    if (format === 'xlsx') {
+        const filePath = path.join(__dirname, 'sample_bulk_upload_products.xlsx');
+        return res.download(filePath, 'sample_bulk_upload_products.xlsx');
+    } else if (format === 'csv') {
+        const filePath = path.join(__dirname, 'sample_bulk_upload_products.csv');
+        res.setHeader('Content-Type', 'text/csv');
+        return res.download(filePath, 'sample_bulk_upload_products.csv');
+    }
+    return res.status(400).send('Invalid format. Use xlsx or csv.');
+});
+
 app.put('/api/products/:id', authenticateToken, async (req, res) => {
     const { barcode: newBarcode, name, category, price, stock, cost_price, selling_unit, packaging_unit, conversion_rate, reorder_level, track_batch, track_expiry, stock_levels: incomingStockLevels } = req.body;
     const { id } = req.params;
@@ -8240,8 +8254,14 @@ app.get('/api/company/tax-report', authenticateToken, async (req, res) => {
 
 // Strict Static Asset Security Filter: Prevent access to database dumps, schemas, server code, and internal configs
 app.use((req, res, next) => {
-    const blockedExts = ['.sql', '.env', '.json', '.md', '.py', '.sh', '.yml', '.yaml', '.lock', '.log', '.xlsx', '.csv'];
     const lowerPath = req.path.toLowerCase();
+
+    // Whitelist public inventory template sample files
+    if (lowerPath.includes('sample_bulk_upload_products')) {
+        return next();
+    }
+
+    const blockedExts = ['.sql', '.env', '.json', '.md', '.py', '.sh', '.yml', '.yaml', '.lock', '.log', '.xlsx', '.csv'];
 
     // Block dangerous extensions
     if (blockedExts.some(ext => lowerPath.endsWith(ext))) {

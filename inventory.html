@@ -1453,13 +1453,16 @@
                 <p style="color: #888; font-size: 13px; margin-bottom: 20px;">Supported formats: .xlsx, .xls, .csv<br><strong>Columns:</strong> Product Name, Category, Cost, Markup, Price, Current Stock, Selling Unit, Reorder Level</p>
                 
                 <input type="file" id="bulkFileInput" accept=".xlsx, .xls, .csv" style="display:none" onchange="handleBulkFileSelect(this)">
-                <div style="display:flex; justify-content:center; gap:10px;">
-                    <button type="button" onclick="document.getElementById('bulkFileInput').click()" style="background:var(--primary-color); color:white; border:none; padding:10px 25px; border-radius:6px; cursor:pointer; font-weight:600;">
-                        Select File
+                <div style="display:flex; justify-content:center; gap:10px; flex-wrap:wrap;">
+                    <button type="button" onclick="document.getElementById('bulkFileInput').click()" style="background:var(--primary-color); color:white; border:none; padding:10px 22px; border-radius:6px; cursor:pointer; font-weight:600;">
+                        <i class="fas fa-folder-open"></i> Select File
                     </button>
-                    <button type="button" onclick="downloadTemplate()" style="background:#f1f5f9; color:#334155; border:1px solid #cbd5e1; padding:10px 20px; border-radius:6px; cursor:pointer; font-weight:600;">
-                        <i class="fas fa-download"></i> Download Template
-                    </button>
+                    <a href="sample_bulk_upload_products.xlsx" download="sample_bulk_upload_products.xlsx" style="background:#f1f5f9; color:#334155; border:1px solid #cbd5e1; padding:10px 18px; border-radius:6px; cursor:pointer; font-weight:600; text-decoration:none; display:inline-flex; align-items:center; gap:6px; font-size:13px;">
+                        <i class="fas fa-file-excel" style="color:#16a34a;"></i> Download Sample (.xlsx)
+                    </a>
+                    <a href="sample_bulk_upload_products.csv" download="sample_bulk_upload_products.csv" style="background:#f1f5f9; color:#334155; border:1px solid #cbd5e1; padding:10px 18px; border-radius:6px; cursor:pointer; font-weight:600; text-decoration:none; display:inline-flex; align-items:center; gap:6px; font-size:13px;">
+                        <i class="fas fa-file-csv" style="color:#0284c7;"></i> Download Sample (.csv)
+                    </a>
                 </div>
                 <div id="bulkFileName" style="margin-top: 15px; font-weight: 600; color: #333;"></div>
                 <div id="bulkUploadStatus" style="margin-top: 20px; display:none;"></div>
