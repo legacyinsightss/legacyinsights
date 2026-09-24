@@ -1450,12 +1450,17 @@
             <div id="bulkUploadSection" style="display:none; text-align:center; padding:30px; border: 2px dashed #e0e0e0; border-radius: 12px; background: #fafafa; margin-bottom: 20px;">
                 <i class="fas fa-cloud-upload-alt" style="font-size: 48px; color: #ccc; margin-bottom: 15px;"></i>
                 <h4 style="color: #555; margin-bottom: 10px;">Upload Inventory Excel Sheet</h4>
-                <p style="color: #888; font-size: 13px; margin-bottom: 20px;">Supported formats: .xlsx, .xls, .csv<br><strong>Columns:</strong> Product Name, Category, Cost, Markup, Price, Current Stock, Physical Count, Selling Unit, Packaging Unit, Items per Package, Reorder Level, Batch Number, Expiry Date</p>
+                <p style="color: #888; font-size: 13px; margin-bottom: 20px;">Supported formats: .xlsx, .xls, .csv<br><strong>Columns:</strong> Product Name, Category, Cost, Markup, Price, Current Stock, Selling Unit, Reorder Level</p>
                 
-                <input type="file" id="bulkFileInput" accept=".xlsx, .xls" style="display:none" onchange="handleBulkFileSelect(this)">
-                <button onclick="document.getElementById('bulkFileInput').click()" style="background:var(--primary-color); color:white; border:none; padding:10px 25px; border-radius:6px; cursor:pointer; font-weight:600;">
-                    Select File
-                </button>
+                <input type="file" id="bulkFileInput" accept=".xlsx, .xls, .csv" style="display:none" onchange="handleBulkFileSelect(this)">
+                <div style="display:flex; justify-content:center; gap:10px;">
+                    <button type="button" onclick="document.getElementById('bulkFileInput').click()" style="background:var(--primary-color); color:white; border:none; padding:10px 25px; border-radius:6px; cursor:pointer; font-weight:600;">
+                        Select File
+                    </button>
+                    <button type="button" onclick="downloadTemplate()" style="background:#f1f5f9; color:#334155; border:1px solid #cbd5e1; padding:10px 20px; border-radius:6px; cursor:pointer; font-weight:600;">
+                        <i class="fas fa-download"></i> Download Template
+                    </button>
+                </div>
                 <div id="bulkFileName" style="margin-top: 15px; font-weight: 600; color: #333;"></div>
                 <div id="bulkUploadStatus" style="margin-top: 20px; display:none;"></div>
             </div>
@@ -1514,29 +1519,16 @@
                             <input type="number" id="pStock" placeholder="0" min="0">
                         </div>
 
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                            <div class="form-group">
-                                <label>Batch / Lot Number</label>
-                                <input type="text" id="pBatchNumber" placeholder="Optional">
-                            </div>
-                            <div class="form-group">
-                                <label>Expiry Date (Optional)</label>
-                                <input type="date" id="pExpiryDate">
-                            </div>
-                        </div>
-                        
+                        <!-- Hidden inputs for hardware defaults (Batch & Expiry removed for hardware items) -->
+                        <input type="hidden" id="pBatchNumber" value="">
+                        <input type="hidden" id="pExpiryDate" value="">
+                        <input type="hidden" id="pPackagingUnit" value="Unit">
+                        <input type="hidden" id="pConversion" value="1">
+
                         <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 15px; background: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
                             <div class="form-group" style="margin-bottom:0;">
                                 <label>Selling Unit</label>
-                                <input type="text" id="pSellingUnit" placeholder="e.g. Bottle">
-                            </div>
-                            <div class="form-group" style="margin-bottom:0;">
-                                <label>Packaging Unit</label>
-                                <input type="text" id="pPackagingUnit" placeholder="e.g. Box">
-                            </div>
-                            <div class="form-group" style="margin-bottom:0;">
-                                <label>Items per Package</label>
-                                <input type="number" id="pConversion" value="1" min="1">
+                                <input type="text" id="pSellingUnit" placeholder="e.g. Piece, Bag, Roll, Unit">
                             </div>
                             <div class="form-group" style="margin-bottom:0;">
                                 <label>Reorder Level</label>
@@ -2928,14 +2920,14 @@
 
         function downloadTemplate() {
             const data = [
-                { "Product Name": "Portland Cement (50kg Bag)", "Category": "Building Materials", "Cost": 85, "Markup": "29%", "Price": 110, "Current Stock": 200, "Physical Count": 200, "Batch Number": "LOT-CEM-01", "Expiry Date": "", "Selling Unit": "Bag", "Packaging Unit": "Pallet", "Items per Package": 40, "Reorder Level": 50 },
-                { "Product Name": "High Tensile Steel Rod 12mm", "Category": "Building Materials", "Cost": 60, "Markup": "30%", "Price": 78, "Current Stock": 150, "Physical Count": 150, "Batch Number": "LOT-ROD-12", "Expiry Date": "", "Selling Unit": "Piece", "Packaging Unit": "Bundle", "Items per Package": 10, "Reorder Level": 30 },
-                { "Product Name": "PVC Pressure Pipe 4\" (6m)", "Category": "Plumbing Supplies", "Cost": 45, "Markup": "44%", "Price": 65, "Current Stock": 80, "Physical Count": 80, "Batch Number": "LOT-PVC-04", "Expiry Date": "", "Selling Unit": "Length", "Packaging Unit": "Bundle", "Items per Package": 5, "Reorder Level": 20 },
-                { "Product Name": "Acrylic Emulsion Paint White (20L)", "Category": "Paints & Finishes", "Cost": 280, "Markup": "28%", "Price": 360, "Current Stock": 40, "Physical Count": 40, "Batch Number": "LOT-PNT-20", "Expiry Date": "", "Selling Unit": "Bucket", "Packaging Unit": "Carton", "Items per Package": 1, "Reorder Level": 10 },
-                { "Product Name": "Claw Hammer 16oz Fiberglass", "Category": "Tools & Hardware", "Cost": 35, "Markup": "48%", "Price": 52, "Current Stock": 60, "Physical Count": 60, "Batch Number": "LOT-HAM-16", "Expiry Date": "", "Selling Unit": "Piece", "Packaging Unit": "Box", "Items per Package": 12, "Reorder Level": 15 },
-                { "Product Name": "Angle Grinder 115mm 850W", "Category": "Tools & Hardware", "Cost": 220, "Markup": "40%", "Price": 310, "Current Stock": 25, "Physical Count": 25, "Batch Number": "LOT-GRN-850", "Expiry Date": "", "Selling Unit": "Unit", "Packaging Unit": "Box", "Items per Package": 1, "Reorder Level": 5 },
-                { "Product Name": "2.5mm Twin & Earth Cable (100m)", "Category": "Electrical Supplies", "Cost": 320, "Markup": "34%", "Price": 430, "Current Stock": 30, "Physical Count": 30, "Batch Number": "LOT-CAB-25", "Expiry Date": "", "Selling Unit": "Roll", "Packaging Unit": "Box", "Items per Package": 5, "Reorder Level": 8 },
-                { "Product Name": "Drywall Screws 3.5x25mm (Box 1000)", "Category": "Fasteners & Fixings", "Cost": 28, "Markup": "50%", "Price": 42, "Current Stock": 100, "Physical Count": 100, "Batch Number": "LOT-SCR-25", "Expiry Date": "", "Selling Unit": "Box", "Packaging Unit": "Carton", "Items per Package": 20, "Reorder Level": 25 }
+                { "Product Name": "Portland Cement (50kg Bag)", "Category": "Building Materials", "Cost": 85, "Markup": "29%", "Price": 110, "Current Stock": 200, "Selling Unit": "Bag", "Reorder Level": 50 },
+                { "Product Name": "High Tensile Steel Rod 12mm", "Category": "Building Materials", "Cost": 60, "Markup": "30%", "Price": 78, "Current Stock": 150, "Selling Unit": "Piece", "Reorder Level": 30 },
+                { "Product Name": "PVC Pressure Pipe 4\" (6m)", "Category": "Plumbing Supplies", "Cost": 45, "Markup": "44%", "Price": 65, "Current Stock": 80, "Selling Unit": "Length", "Reorder Level": 20 },
+                { "Product Name": "Acrylic Emulsion Paint White (20L)", "Category": "Paints & Finishes", "Cost": 280, "Markup": "28%", "Price": 360, "Current Stock": 40, "Selling Unit": "Bucket", "Reorder Level": 10 },
+                { "Product Name": "Claw Hammer 16oz Fiberglass", "Category": "Tools & Hardware", "Cost": 35, "Markup": "48%", "Price": 52, "Current Stock": 60, "Selling Unit": "Piece", "Reorder Level": 15 },
+                { "Product Name": "Angle Grinder 115mm 850W", "Category": "Tools & Hardware", "Cost": 220, "Markup": "40%", "Price": 310, "Current Stock": 25, "Selling Unit": "Unit", "Reorder Level": 5 },
+                { "Product Name": "2.5mm Twin & Earth Cable (100m)", "Category": "Electrical Supplies", "Cost": 320, "Markup": "34%", "Price": 430, "Current Stock": 30, "Selling Unit": "Roll", "Reorder Level": 8 },
+                { "Product Name": "Drywall Screws 3.5x25mm (Box 1000)", "Category": "Fasteners & Fixings", "Cost": 28, "Markup": "50%", "Price": 42, "Current Stock": 100, "Selling Unit": "Box", "Reorder Level": 25 }
             ];
 
             // Create worksheet

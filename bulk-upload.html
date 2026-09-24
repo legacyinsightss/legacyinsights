@@ -13,6 +13,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bulk Product Upload</title>
     <link rel="icon" type="image/png" href="logo.png">
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
     <style>
         body { font-family: 'Segoe UI', sans-serif; padding: 40px; background: #f4f4f9; display: flex; justify-content: center; }
         .container { width: 100%; max-width: 500px; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.1); }
@@ -39,14 +40,17 @@
 <body>
     <div class="container">
         <h2>📦 Bulk Stock Upload</h2>
-        <p class="description">Upload an Excel file (.xlsx) with columns:<br><strong>Product Name, Category, Cost, Markup, Price, Current Stock, Batch Number, Selling Unit, Packaging Unit, Items per Package, Reorder Level</strong><br><small style="color:#64748b;">(Expiry Date is optional and not required for hardware items)</small></p>
+        <p class="description">Upload an Excel file (.xlsx, .csv) with columns:<br><strong>Product Name, Category, Cost, Markup, Price, Current Stock, Selling Unit, Reorder Level</strong></p>
         
         <div class="form-group">
             <label>Select Excel File</label>
             <input type="file" id="fileInput" accept=".xlsx, .xls, .csv">
         </div>
         
-        <button onclick="uploadFile()">Upload Products</button>
+        <div style="display:flex; flex-direction:column; gap:10px; margin-bottom: 20px;">
+            <button onclick="uploadFile()">Upload Products</button>
+            <button type="button" onclick="downloadTemplate()" style="background:#f1f5f9; color:#334155; border:1px solid #cbd5e1; font-weight:600;">📥 Download Excel Template</button>
+        </div>
         
         <div id="status"></div>
         <a href="/dashboard" class="back-link">← Back to Dashboard</a>
@@ -100,6 +104,27 @@
                 btn.disabled = false;
                 btn.innerText = 'Upload Products';
             }
+        }
+
+        function downloadTemplate() {
+            const data = [
+                { "Product Name": "Portland Cement (50kg Bag)", "Category": "Building Materials", "Cost": 85, "Markup": "29%", "Price": 110, "Current Stock": 200, "Selling Unit": "Bag", "Reorder Level": 50 },
+                { "Product Name": "High Tensile Steel Rod 12mm", "Category": "Building Materials", "Cost": 60, "Markup": "30%", "Price": 78, "Current Stock": 150, "Selling Unit": "Piece", "Reorder Level": 30 },
+                { "Product Name": "PVC Pressure Pipe 4\" (6m)", "Category": "Plumbing Supplies", "Cost": 45, "Markup": "44%", "Price": 65, "Current Stock": 80, "Selling Unit": "Length", "Reorder Level": 20 },
+                { "Product Name": "Acrylic Emulsion Paint White (20L)", "Category": "Paints & Finishes", "Cost": 280, "Markup": "28%", "Price": 360, "Current Stock": 40, "Selling Unit": "Bucket", "Reorder Level": 10 },
+                { "Product Name": "Claw Hammer 16oz Fiberglass", "Category": "Tools & Hardware", "Cost": 35, "Markup": "48%", "Price": 52, "Current Stock": 60, "Selling Unit": "Piece", "Reorder Level": 15 },
+                { "Product Name": "Angle Grinder 115mm 850W", "Category": "Tools & Hardware", "Cost": 220, "Markup": "40%", "Price": 310, "Current Stock": 25, "Selling Unit": "Unit", "Reorder Level": 5 },
+                { "Product Name": "2.5mm Twin & Earth Cable (100m)", "Category": "Electrical Supplies", "Cost": 320, "Markup": "34%", "Price": 430, "Current Stock": 30, "Selling Unit": "Roll", "Reorder Level": 8 },
+                { "Product Name": "Drywall Screws 3.5x25mm (Box 1000)", "Category": "Fasteners & Fixings", "Cost": 28, "Markup": "50%", "Price": 42, "Current Stock": 100, "Selling Unit": "Box", "Reorder Level": 25 }
+            ];
+
+            const ws = XLSX.utils.json_to_sheet(data);
+            const wscols = Object.keys(data[0]).map(k => ({ wch: k.length + 5 }));
+            ws['!cols'] = wscols;
+
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Inventory");
+            XLSX.writeFile(wb, "hardware_inventory_template.xlsx");
         }
     </script>
 

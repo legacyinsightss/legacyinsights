@@ -2770,9 +2770,9 @@ app.post('/api/products', authenticateToken, async (req, res) => {
             [barcode, name, category, price, stockValue, stockLevels, cost_price || 0, selling_unit || 'Unit', packaging_unit || 'Box', conversion_rate || 1, reorder_level || 10, track_batch ?? true, track_expiry ?? false, req.user.tenant_id]
         );
 
-        // Insert Batch if provided and stock > 0
-        if (stockValue > 0 && (batch_number || expiry_date)) {
-            const finalBatchNum = batch_number || `BATCH-${Date.now()}`;
+        // Insert Batch if stock > 0 (hardware products auto-generate batch if omitted)
+        if (stockValue > 0) {
+            const finalBatchNum = batch_number || `BATCH-${barcode}-${Date.now().toString().slice(-4)}`;
             await pool.query(
                 `INSERT INTO product_batches (product_barcode, batch_number, expiry_date, quantity, quantity_available, quantity_received, branch_id, status)
                  VALUES ($1, $2, $3, $4, $4, $4, $5, 'Active')
@@ -3004,7 +3004,7 @@ app.post('/api/products/bulk', authenticateToken, upload.single('file'), async (
 
                 stock = parseInt(findColumn(['currentstock', 'stock', 'quantity']) || 0);
                 sellingUnit = findColumn(['sellingunit', 'unit']) || 'Unit';
-                packagingUnit = findColumn(['packagingunit', 'box', 'pack']) || 'Box';
+                packagingUnit = findColumn(['packagingunit', 'box', 'pack']) || sellingUnit || 'Unit';
                 conversionRate = cleanNum(findColumn(['itemsperpackage', 'conversion', 'perpackage']) || 1);
                 reorderLevel = parseInt(findColumn(['reorderlevel', 'reorder', 'threshold']) || 10);
 
@@ -3096,13 +3096,17 @@ app.post('/api/products/bulk', authenticateToken, upload.single('file'), async (
                     );
                 }
 
-                // If batch number is provided, create/update batch record
-                if (batchNumber) {
+                // Create/update batch record for stock tracking
+                if (stock > 0) {
+                    const finalBatch = batchNumber || `BATCH-${barcode}-${Date.now().toString().slice(-4)}`;
                     await pool.query(
                         `INSERT INTO product_batches (product_barcode, batch_number, expiry_date, quantity, quantity_available, quantity_received, branch_id, status)
                          VALUES ($1, $2, $3, $4, $4, $4, $5, 'Active')
-                         ON CONFLICT (product_barcode, batch_number, branch_id) DO NOTHING`,
-                        [barcode, batchNumber, expiryDate || null, stock, branchId]
+                         ON CONFLICT (product_barcode, batch_number, branch_id) DO UPDATE SET
+                             quantity = EXCLUDED.quantity,
+                             quantity_available = EXCLUDED.quantity_available,
+                             quantity_received = EXCLUDED.quantity_received`,
+                        [barcode, finalBatch, expiryDate || null, stock, branchId]
                     );
                 }
 
