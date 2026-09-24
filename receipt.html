@@ -289,6 +289,10 @@
                 <span class="detail-label">Date:</span>
                 <span id="rDate">...</span>
             </div>
+            <div class="detail-row" id="rBranchRow" style="display:none;">
+                <span class="detail-label">Branch:</span>
+                <span id="rBranch">...</span>
+            </div>
             <div class="detail-row">
                 <span class="detail-label">Cashier:</span>
                 <span id="rCashier">...</span>
@@ -410,11 +414,19 @@
                 if (cashierName === 'Chief Executive Officer') cashierName = 'Cecil Mac Ben Amoah';
                 document.getElementById('rCashier').textContent = cashierName;
                 
-                // Set branch address if custom branch provided
-                if(data.branch_address) {
+                // Set branch name if available
+                if (data.store_location) {
+                    const branchEl = document.getElementById('rBranch');
+                    const branchRow = document.getElementById('rBranchRow');
+                    if (branchEl && branchRow) {
+                        branchEl.textContent = data.store_location;
+                        branchRow.style.display = 'flex';
+                    }
+                }
+                
+                // Set branch address if specific branch address is provided
+                if (data.branch_address) {
                     document.getElementById('rAddress').textContent = data.branch_address;
-                } else if(data.store_location && data.store_location !== 'Main Warehouse' && data.store_location !== 'Amasaman') {
-                    document.getElementById('rAddress').textContent = data.store_location;
                 }
                 
                 const receiptTypeEl = document.getElementById('rReceiptType');
