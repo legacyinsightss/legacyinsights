@@ -3,7 +3,7 @@
  * Legacy Insights / Footprint Enterprise POS & ERP
  */
 
-const CACHE_NAME = 'footprint-pos-v2';
+const CACHE_NAME = 'footprint-pos-v3';
 const STATIC_ASSETS = [
     '/logo.png',
     '/currency.js',
@@ -40,7 +40,12 @@ self.addEventListener('fetch', (event) => {
     // Only handle GET requests
     if (event.request.method !== 'GET') return;
     const url = new URL(event.request.url);
+
+    // Skip API endpoints
     if (url.pathname.startsWith('/api/')) return;
+
+    // Allow cross-origin requests (fonts, CDNs) to be handled natively by the browser
+    if (url.origin !== self.location.origin) return;
 
     event.respondWith(
         fetch(event.request)
@@ -53,6 +58,14 @@ self.addEventListener('fetch', (event) => {
                 }
                 return networkResponse;
             })
-            .catch(() => caches.match(event.request))
+            .catch(async () => {
+                const cached = await caches.match(event.request);
+                if (cached) return cached;
+                return new Response('Network unavailable', {
+                    status: 503,
+                    statusText: 'Service Unavailable',
+                    headers: { 'Content-Type': 'text/plain' }
+                });
+            })
     );
 });
