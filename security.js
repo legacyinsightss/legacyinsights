@@ -32,6 +32,7 @@ exports.securityHeaders = helmet({
                 'https://api.mtn.com', 
                 'https://cdn.jsdelivr.net', 
                 'https://cdnjs.cloudflare.com',
+                'https://unpkg.com',
                 'https://cdn.sheetjs.com',
                 'https://fonts.googleapis.com',
                 'https://fonts.gstatic.com'

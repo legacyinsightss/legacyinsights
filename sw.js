@@ -3,7 +3,7 @@
  * Legacy Insights / Footprint Enterprise POS & ERP
  */
 
-const CACHE_NAME = 'footprint-pos-v3';
+const CACHE_NAME = 'footprint-pos-v4';
 const STATIC_ASSETS = [
     '/logo.png',
     '/currency.js',
@@ -17,12 +17,13 @@ const STATIC_ASSETS = [
 ];
 
 self.addEventListener('install', (event) => {
+    self.skipWaiting();
     event.waitUntil(
         caches.open(CACHE_NAME).then((cache) => {
             return cache.addAll(STATIC_ASSETS).catch((err) => {
                 console.warn('SW pre-cache warning:', err);
             });
-        }).then(() => self.skipWaiting())
+        })
     );
 });
 
