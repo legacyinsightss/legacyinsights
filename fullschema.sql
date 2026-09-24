@@ -86,7 +86,7 @@ CREATE TABLE products (
     conversion_rate DECIMAL(10,2) DEFAULT 1,
     reorder_level INTEGER DEFAULT 10,
     track_batch BOOLEAN DEFAULT TRUE,
-    track_expiry BOOLEAN DEFAULT TRUE,
+    track_expiry BOOLEAN DEFAULT FALSE,
     branch_id INTEGER,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP

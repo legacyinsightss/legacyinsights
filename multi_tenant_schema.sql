@@ -154,7 +154,7 @@ CREATE TABLE IF NOT EXISTS products (
     conversion_rate DECIMAL(10,2) DEFAULT 1,
     reorder_level INTEGER DEFAULT 10,
     track_batch BOOLEAN DEFAULT TRUE,
-    track_expiry BOOLEAN DEFAULT TRUE,
+    track_expiry BOOLEAN DEFAULT FALSE,
     stock_levels JSONB,
     stock INTEGER DEFAULT 0,
     tenant_id INT REFERENCES tenants(id) DEFAULT 1,

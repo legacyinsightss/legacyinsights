@@ -735,8 +735,8 @@
                 </div>
                 <div class="menu-card" onclick="switchTab('shelf')">
                     <i class="fas fa-cubes"></i>
-                    <h3>Batch & Expiration Checking</h3>
-                    <p>Monitor batch numbers and product expiry dates.</p>
+                    <h3>Batch & Lot Tracking</h3>
+                    <p>Monitor batch and lot numbers across stock.</p>
                 </div>
                 <div class="menu-card" onclick="switchTab('distribution')">
                     <i class="fas fa-truck-loading"></i>
@@ -1219,7 +1219,7 @@
         <div id="tab-shelf" class="tab-content">
             <div onclick="switchTab('overview')" class="back-link"><i class="fas fa-arrow-left"></i> Back to Inventory Menu</div>
             <div class="page-header">
-                <h3>Batch & Expiration Checking</h3>
+                <h3>Batch & Lot Tracking</h3>
             </div>
             
             <div style="display: flex; gap: 15px; margin-bottom: 20px; background: white; padding: 15px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.03); align-items: center;">
@@ -1516,11 +1516,11 @@
 
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                             <div class="form-group">
-                                <label>Batch Number</label>
-                                <input type="text" id="pBatchNumber" required placeholder="Required">
+                                <label>Batch / Lot Number</label>
+                                <input type="text" id="pBatchNumber" placeholder="Optional">
                             </div>
                             <div class="form-group">
-                                <label>Expiry Date</label>
+                                <label>Expiry Date (Optional)</label>
                                 <input type="date" id="pExpiryDate">
                             </div>
                         </div>
@@ -2535,7 +2535,7 @@
             document.getElementById('pBatchNumber').value = '';
             document.getElementById('pExpiryDate').value = '';
             if(document.getElementById('pMarkup')) document.getElementById('pMarkup').value = '';
-            document.getElementById('pBatchNumber').required = true;
+            document.getElementById('pBatchNumber').required = false;
             document.querySelector('#productModal h3').textContent = 'Add New Product';
             resetBulkMode(); // Ensure we start in single entry mode
             document.getElementById('productModal').classList.add('active'); 
@@ -2675,10 +2675,10 @@
                 conversion_rate: parseInt(document.getElementById('pConversion').value) || 1,
                 reorder_level: parseInt(document.getElementById('pReorder').value) || 10,
                 track_batch: true,
-                track_expiry: true, 
+                track_expiry: false, 
                 stock_levels: stockLevels,
                 batch_number: document.getElementById('pBatchNumber').value.trim(),
-                expiry_date: document.getElementById('pExpiryDate').value
+                expiry_date: document.getElementById('pExpiryDate').value || null
             };
 
             try {
@@ -2928,13 +2928,14 @@
 
         function downloadTemplate() {
             const data = [
-                { "Product Name": "Pineapple (each)", "Category": "Fruits", "Cost": 8, "Markup": "25%", "Price": 10, "Current Stock": 40, "Physical Count": 40, "Batch Number": "B001", "Expiry Date": "30/03/2026", "Selling Unit": "Piece", "Packaging Unit": "Crate", "Items per Package": 12, "Reorder Level": 15 },
-                { "Product Name": "Banana (bunch)", "Category": "Fruits", "Cost": 12, "Markup": "25%", "Price": 15, "Current Stock": 35, "Physical Count": 35, "Batch Number": "B002", "Expiry Date": "28/03/2026", "Selling Unit": "Bunch", "Packaging Unit": "Crate", "Items per Package": 10, "Reorder Level": 10 },
-                { "Product Name": "Watermelon (each)", "Category": "Fruits", "Cost": 18, "Markup": "30%", "Price": 23.4, "Current Stock": 20, "Physical Count": 20, "Batch Number": "B003", "Expiry Date": "05/03/2026", "Selling Unit": "Piece", "Packaging Unit": "Crate", "Items per Package": 8, "Reorder Level": 8 },
-                { "Product Name": "Tomatoes (kg)", "Category": "Vegetables", "Cost": 5, "Markup": "35%", "Price": 6.75, "Current Stock": 60, "Physical Count": 60, "Batch Number": "B008", "Expiry Date": "27/02/2026", "Selling Unit": "Kg", "Packaging Unit": "Crate", "Items per Package": 25, "Reorder Level": 20 },
-                { "Product Name": "Rice (5kg bag)", "Category": "Grains", "Cost": 35, "Markup": "20%", "Price": 42, "Current Stock": 50, "Physical Count": 50, "Batch Number": "B013", "Expiry Date": "30/08/2026", "Selling Unit": "Bag", "Packaging Unit": "Sack", "Items per Package": 10, "Reorder Level": 15 },
-                { "Product Name": "Sugar (1kg)", "Category": "Groceries", "Cost": 8, "Markup": "25%", "Price": 10, "Current Stock": 70, "Physical Count": 70, "Batch Number": "B014", "Expiry Date": "30/09/2026", "Selling Unit": "Pack", "Packaging Unit": "Carton", "Items per Package": 24, "Reorder Level": 20 },
-                { "Product Name": "Cooking Oil (1L)", "Category": "Groceries", "Cost": 15, "Markup": "20%", "Price": 18, "Current Stock": 55, "Physical Count": 55, "Batch Number": "B016", "Expiry Date": "30/10/2026", "Selling Unit": "Bottle", "Packaging Unit": "Carton", "Items per Package": 12, "Reorder Level": 20 }
+                { "Product Name": "Portland Cement (50kg Bag)", "Category": "Building Materials", "Cost": 85, "Markup": "29%", "Price": 110, "Current Stock": 200, "Physical Count": 200, "Batch Number": "LOT-CEM-01", "Expiry Date": "", "Selling Unit": "Bag", "Packaging Unit": "Pallet", "Items per Package": 40, "Reorder Level": 50 },
+                { "Product Name": "High Tensile Steel Rod 12mm", "Category": "Building Materials", "Cost": 60, "Markup": "30%", "Price": 78, "Current Stock": 150, "Physical Count": 150, "Batch Number": "LOT-ROD-12", "Expiry Date": "", "Selling Unit": "Piece", "Packaging Unit": "Bundle", "Items per Package": 10, "Reorder Level": 30 },
+                { "Product Name": "PVC Pressure Pipe 4\" (6m)", "Category": "Plumbing Supplies", "Cost": 45, "Markup": "44%", "Price": 65, "Current Stock": 80, "Physical Count": 80, "Batch Number": "LOT-PVC-04", "Expiry Date": "", "Selling Unit": "Length", "Packaging Unit": "Bundle", "Items per Package": 5, "Reorder Level": 20 },
+                { "Product Name": "Acrylic Emulsion Paint White (20L)", "Category": "Paints & Finishes", "Cost": 280, "Markup": "28%", "Price": 360, "Current Stock": 40, "Physical Count": 40, "Batch Number": "LOT-PNT-20", "Expiry Date": "", "Selling Unit": "Bucket", "Packaging Unit": "Carton", "Items per Package": 1, "Reorder Level": 10 },
+                { "Product Name": "Claw Hammer 16oz Fiberglass", "Category": "Tools & Hardware", "Cost": 35, "Markup": "48%", "Price": 52, "Current Stock": 60, "Physical Count": 60, "Batch Number": "LOT-HAM-16", "Expiry Date": "", "Selling Unit": "Piece", "Packaging Unit": "Box", "Items per Package": 12, "Reorder Level": 15 },
+                { "Product Name": "Angle Grinder 115mm 850W", "Category": "Tools & Hardware", "Cost": 220, "Markup": "40%", "Price": 310, "Current Stock": 25, "Physical Count": 25, "Batch Number": "LOT-GRN-850", "Expiry Date": "", "Selling Unit": "Unit", "Packaging Unit": "Box", "Items per Package": 1, "Reorder Level": 5 },
+                { "Product Name": "2.5mm Twin & Earth Cable (100m)", "Category": "Electrical Supplies", "Cost": 320, "Markup": "34%", "Price": 430, "Current Stock": 30, "Physical Count": 30, "Batch Number": "LOT-CAB-25", "Expiry Date": "", "Selling Unit": "Roll", "Packaging Unit": "Box", "Items per Package": 5, "Reorder Level": 8 },
+                { "Product Name": "Drywall Screws 3.5x25mm (Box 1000)", "Category": "Fasteners & Fixings", "Cost": 28, "Markup": "50%", "Price": 42, "Current Stock": 100, "Physical Count": 100, "Batch Number": "LOT-SCR-25", "Expiry Date": "", "Selling Unit": "Box", "Packaging Unit": "Carton", "Items per Package": 20, "Reorder Level": 25 }
             ];
 
             // Create worksheet
@@ -4574,7 +4575,7 @@
                 <tr>
                     <td data-label="Product">${i.name}</td>
                     <td data-label="Batch" style="font-family:monospace; color:#555;">${i.batch_number || '-'}</td>
-                    <td data-label="Expiry" style="${getExpiryColor(i.expiry_date)}">${new Date(i.expiry_date).toLocaleDateString()}</td>
+                    <td data-label="Expiry" style="${getExpiryColor(i.expiry_date)}">${i.expiry_date ? new Date(i.expiry_date).toLocaleDateString() : 'N/A'}</td>
                     <td data-label="Stock" style="font-weight:600;">${currentStock}</td>
                     <td data-label="Quantity" style="font-weight:bold; color:var(--primary-color);">${i.quantity} ${i.selling_unit || 'Units'}</td>
                     <td data-label="Status"><span class="stock-badge ${statusClass}">${status}</span></td>

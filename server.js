@@ -415,11 +415,14 @@ async function initDb() {
                 conversion_rate DECIMAL(10,2) DEFAULT 1,
                 reorder_level INTEGER DEFAULT 10,
                 track_batch BOOLEAN DEFAULT TRUE,
-                track_expiry BOOLEAN DEFAULT TRUE,
+                track_expiry BOOLEAN DEFAULT FALSE,
                 stock_levels JSONB,
                 stock INTEGER DEFAULT 0,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
+            
+            -- Hardware migration: Ensure track_expiry defaults to FALSE and existing hardware items do not require expiry
+            ALTER TABLE products ALTER COLUMN track_expiry SET DEFAULT FALSE;
             
             -- Add unique constraint on barcode+name combination (not just barcode)
             -- First check for and handle any existing duplicates
@@ -573,6 +576,15 @@ async function initDb() {
                 status VARCHAR(50) DEFAULT 'Pending',
                 total_amount DECIMAL(10, 2) DEFAULT 0,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+
+            -- Create Purchase Order Items Table
+            CREATE TABLE IF NOT EXISTS purchase_order_items (
+                id SERIAL PRIMARY KEY,
+                po_id INTEGER REFERENCES purchase_orders(id) ON DELETE CASCADE,
+                product_barcode VARCHAR(50),
+                quantity INTEGER NOT NULL,
+                unit_cost DECIMAL(10, 2) NOT NULL
             );
 
             -- Create Transactions Table
@@ -2718,7 +2730,7 @@ app.post('/api/products', authenticateToken, async (req, res) => {
         await pool.query(
             `INSERT INTO products (barcode, name, category, price, stock, stock_levels, cost_price, selling_unit, packaging_unit, conversion_rate, reorder_level, track_batch, track_expiry, tenant_id) 
              VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)`,
-            [barcode, name, category, price, stockValue, stockLevels, cost_price || 0, selling_unit || 'Unit', packaging_unit || 'Box', conversion_rate || 1, reorder_level || 10, track_batch, track_expiry, req.user.tenant_id]
+            [barcode, name, category, price, stockValue, stockLevels, cost_price || 0, selling_unit || 'Unit', packaging_unit || 'Box', conversion_rate || 1, reorder_level || 10, track_batch ?? true, track_expiry ?? false, req.user.tenant_id]
         );
 
         // Insert Batch if provided and stock > 0
@@ -3031,7 +3043,7 @@ app.post('/api/products/bulk', authenticateToken, upload.single('file'), async (
                             name = $1, category = $2, price = $3, cost_price = $4, 
                             stock = $5, stock_levels = $6, selling_unit = $7, 
                             packaging_unit = $8, conversion_rate = $9, reorder_level = $10,
-                            track_batch = true, track_expiry = true
+                            track_batch = true, track_expiry = false
                          WHERE id = $11`,
                         [name, category, price, cost, newTotalStock, newStockLevels, sellingUnit, packagingUnit, conversionRate, reorderLevel, existingProduct.id]
                     );
@@ -3039,10 +3051,10 @@ app.post('/api/products/bulk', authenticateToken, upload.single('file'), async (
                     // NEW: Calculate initial stock levels
                     stockLevels = JSON.stringify({ [userBranch]: stock });
 
-                    // Insert brand new product
+                    // Insert brand new product (Hardware default: track_expiry = false)
                     await pool.query(
                         `INSERT INTO products (barcode, name, category, price, cost_price, stock, stock_levels, selling_unit, packaging_unit, conversion_rate, reorder_level, track_batch, track_expiry, tenant_id)
-                         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, true, true, $12)`,
+                         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, true, false, $12)`,
                         [barcode, name, category, price, cost, stock, stockLevels, sellingUnit, packagingUnit, conversionRate, reorderLevel, req.user.tenant_id]
                     );
                 }
@@ -3709,25 +3721,23 @@ app.post('/api/purchase-orders/:id/receive', authenticateToken, async (req, res)
 
             // Auto-generate if missing
             const itemCode = product.name.substring(0, 3).toUpperCase().replace(/\s/g, '');
-            if (!finalExpiry) {
+            const trackExpiry = product.track_expiry === true;
+            if (trackExpiry && !finalExpiry) {
                 finalExpiry = new Date();
                 finalExpiry.setFullYear(finalExpiry.getFullYear() + 1);
             }
-            const expStr = finalExpiry.toISOString().slice(2, 10).replace(/-/g, '');
+            const expStr = finalExpiry ? finalExpiry.toISOString().slice(2, 10).replace(/-/g, '') : 'LOT';
             if (!finalBatchNum) finalBatchNum = `${supplierCode}-${dateStr}-${itemCode}-${expStr}`;
 
-            // Check for existing batch with same number but different expiry
+            // Check for existing batch with same number
             const existingBatchRes = await client.query(
                 'SELECT expiry_date FROM product_batches WHERE product_barcode = $1 AND batch_number = $2 AND branch_id = $3',
                 [item.product_barcode, finalBatchNum, branchId]
             );
 
-            if (existingBatchRes.rows.length > 0) {
-                const existingExpiry = new Date(existingBatchRes.rows[0].expiry_date);
-                // Compare dates (ignoring time)
-                if (existingExpiry.toISOString().slice(0, 10) !== finalExpiry.toISOString().slice(0, 10)) {
-                    // Conflict: Same batch number, different expiry.
-                    // Append expiry date to batch number to create a new batch record
+            if (existingBatchRes.rows.length > 0 && finalExpiry) {
+                const existingExpiry = existingBatchRes.rows[0].expiry_date ? new Date(existingBatchRes.rows[0].expiry_date) : null;
+                if (existingExpiry && existingExpiry.toISOString().slice(0, 10) !== finalExpiry.toISOString().slice(0, 10)) {
                     finalBatchNum = `${finalBatchNum}-${expStr}`;
                 }
             }
@@ -4013,7 +4023,7 @@ app.get('/api/batches/expiry', authenticateToken, async (req, res) => {
             params.push(req.user.store_id);
         }
 
-        query += ` ORDER BY b.expiry_date ASC`;
+        query += ` ORDER BY b.expiry_date ASC NULLS LAST, b.created_at ASC, b.id ASC`;
 
         const result = await pool.query(query, params);
         res.json(result.rows);
@@ -5495,9 +5505,9 @@ app.post('/api/transactions', authenticateToken, async (req, res) => {
                     `, [item.qty, item.id, storeLoc]);
 
                     // FIFO/FEFO Batch Deduction
-                    // Get batches ordered by expiry (FEFO)
+                    // Get batches ordered by expiry (FEFO) or FIFO for hardware items (expiry_date NULLS LAST)
                     const batches = await client.query(
-                        'SELECT * FROM product_batches WHERE product_barcode = $1 AND quantity > 0 ORDER BY expiry_date ASC FOR UPDATE',
+                        'SELECT * FROM product_batches WHERE product_barcode = $1 AND quantity > 0 ORDER BY expiry_date ASC NULLS LAST, created_at ASC, id ASC FOR UPDATE',
                         [item.barcode]
                     );
 
@@ -5577,7 +5587,7 @@ app.get('/api/batches/product/:barcode', authenticateToken, async (req, res) => 
         const result = await pool.query(`
             SELECT * FROM product_batches 
             WHERE product_barcode = $1 AND quantity_available > 0 
-            ORDER BY expiry_date ASC
+            ORDER BY expiry_date ASC NULLS LAST, created_at ASC
         `, [barcode]);
         res.json(result.rows);
     } catch (err) {
@@ -5599,6 +5609,7 @@ app.get('/api/batches/expiring/:days', authenticateToken, async (req, res) => {
             FROM product_batches pb
             JOIN products p ON pb.product_barcode = p.barcode
             WHERE pb.status = 'Active'
+            AND pb.expiry_date IS NOT NULL
             AND pb.expiry_date BETWEEN CURRENT_DATE AND CURRENT_DATE + INTERVAL '1 day' * $1
         `;
         let params = [days];
@@ -5624,7 +5635,7 @@ app.get('/api/batches/next/:product_barcode', authenticateToken, async (req, res
         const result = await pool.query(`
             SELECT * FROM product_batches
             WHERE product_barcode = $1 AND status = 'Active' AND quantity_available > 0
-            ORDER BY expiry_date ASC, created_at ASC
+            ORDER BY expiry_date ASC NULLS LAST, created_at ASC, id ASC
             LIMIT 1
         `, [product_barcode]);
         res.json(result.rows[0] || null);
@@ -6019,7 +6030,7 @@ app.get('/api/reports/stock-summary/:branch_id', authenticateToken, async (req, 
     }
 });
 
-// 21. Get product for POS with FEFO batch selection
+// 21. Get product for POS with FEFO/FIFO batch selection
 app.get('/api/pos/product/:barcode', authenticateToken, async (req, res) => {
     const { barcode } = req.params;
     try {
@@ -6036,7 +6047,7 @@ app.get('/api/pos/product/:barcode', authenticateToken, async (req, res) => {
             const batchResult = await pool.query(`
                 SELECT * FROM product_batches
                 WHERE product_barcode = $1 AND status = 'Active' AND quantity_available > 0
-                ORDER BY expiry_date ASC, created_at ASC
+                ORDER BY expiry_date ASC NULLS LAST, created_at ASC, id ASC
             `, [barcode]);
             batches = batchResult.rows;
         }
