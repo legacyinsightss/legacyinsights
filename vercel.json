@@ -3,7 +3,22 @@
   "builds": [
     {
       "src": "server.js",
-      "use": "@vercel/node"
+      "use": "@vercel/node",
+      "config": {
+        "includeFiles": [
+          "*.html",
+          "*.css",
+          "*.png",
+          "*.ico",
+          "auth-guard.js",
+          "currency.js",
+          "instant-nav.js",
+          "telemetry-guard.js",
+          "offline-queue.js",
+          "user-session.js",
+          "sw.js"
+        ]
+      }
     }
   ],
   "rewrites": [
