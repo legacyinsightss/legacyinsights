@@ -220,8 +220,23 @@
 
         async function saveCategory(e) {
             e.preventDefault();
-            const name = document.getElementById('catName').value;
-            const description = document.getElementById('catDesc').value;
+            const submitBtn = e.target.querySelector('button[type="submit"]') || document.querySelector('#categoryModal .btn-save');
+            const originalBtnText = submitBtn ? submitBtn.innerHTML : 'Save';
+
+            const name = document.getElementById('catName').value.trim();
+            const description = document.getElementById('catDesc').value.trim();
+
+            if (!name) {
+                alert("Please enter a category name");
+                return;
+            }
+
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+            }
+
+            let savedSuccessfully = false;
 
             try {
                 const token = localStorage.getItem('authToken');
@@ -234,13 +249,31 @@
                     body: JSON.stringify({ name, description })
                 });
 
+                const data = await res.json().catch(() => ({}));
+
                 if (res.ok) {
-                    closeModal();
-                    loadCategories();
+                    savedSuccessfully = true;
                 } else {
-                    alert("Error saving category");
+                    alert(data.message || "Error saving category");
                 }
-            } catch (e) { console.error(e); }
+            } catch (err) {
+                console.error('Error saving category:', err);
+                alert("Error saving category. Please check your connection.");
+            } finally {
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalBtnText;
+                }
+            }
+
+            if (savedSuccessfully) {
+                closeModal();
+                try {
+                    await loadCategories();
+                } catch (loadErr) {
+                    console.error('Error reloading categories:', loadErr);
+                }
+            }
         }
 
         async function deleteCategory(id) {

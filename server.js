@@ -2734,9 +2734,15 @@ app.post('/api/products', authenticateToken, async (req, res) => {
             finalBarcode = 'LI' + Date.now().toString().slice(-6) + Math.floor(10 + Math.random() * 90);
         }
         barcode = finalBarcode;
+        const trimmedName = (name || '').trim();
+        if (!trimmedName) {
+            return res.status(400).json({ message: 'Product name is required' });
+        }
         selling_unit = selling_unit || 'Unit';
         const finalReorderLevel = parseInt(reorder_level) || 1;
         const entryDate = date ? new Date(date) : new Date();
+        const tenantId = req.user.tenant_id || 1;
+
         // Refresh store info from DB to ensure accuracy
         const userRes = await pool.query('SELECT store_id, store_location FROM users WHERE id = $1', [req.user.id]);
         const dbUser = userRes.rows[0];
@@ -2749,8 +2755,8 @@ app.post('/api/products', authenticateToken, async (req, res) => {
 
         // Check if a soft-deleted product with the same barcode+name already exists
         const deletedRes = await pool.query(
-            `SELECT id FROM products WHERE barcode = $1 AND name = $2 AND tenant_id = $3 AND deleted_at IS NOT NULL LIMIT 1`,
-            [barcode, name, req.user.tenant_id]
+            `SELECT id FROM products WHERE barcode = $1 AND LOWER(name) = LOWER($2) AND tenant_id = $3 AND deleted_at IS NOT NULL LIMIT 1`,
+            [barcode, trimmedName, tenantId]
         );
 
         if (deletedRes.rows.length > 0) {
@@ -2764,46 +2770,71 @@ app.post('/api/products', authenticateToken, async (req, res) => {
                     track_batch = $11, track_expiry = $12,
                     deleted_at = NULL, created_at = $15
                  WHERE id = $13 AND tenant_id = $14`,
-                [name, category, price, stockValue, stockLevels,
+                [trimmedName, category, price, stockValue, stockLevels,
                     cost_price || 0, selling_unit || 'Unit', packaging_unit || 'Box',
                     conversion_rate || 1, finalReorderLevel,
-                    track_batch, track_expiry, existingId, req.user.tenant_id, entryDate]
+                    track_batch, track_expiry, existingId, tenantId, entryDate]
             );
-            await logActivity(req, 'RESTORE_PRODUCT', { barcode, name, stock });
-            return res.json({ success: true, restored: true });
+
+            if (stockValue > 0) {
+                const finalBatchNum = batch_number || `BATCH-${barcode}-${Date.now().toString().slice(-4)}`;
+                try {
+                    await pool.query(
+                        `INSERT INTO product_batches (product_barcode, batch_number, expiry_date, quantity, quantity_available, quantity_received, branch_id, tenant_id, status, created_at)
+                         VALUES ($1, $2, $3, $4, $4, $4, $5, $6, 'Active', $7)
+                         ON CONFLICT (product_barcode, batch_number, branch_id) 
+                         DO UPDATE SET 
+                             expiry_date = EXCLUDED.expiry_date,
+                             quantity = EXCLUDED.quantity,
+                             quantity_available = EXCLUDED.quantity_available,
+                             quantity_received = EXCLUDED.quantity_received,
+                             updated_at = CURRENT_TIMESTAMP`,
+                        [barcode, finalBatchNum, expiry_date || null, stockValue, branchId, tenantId, entryDate]
+                    );
+                } catch (batchErr) {
+                    console.error('Batch creation warning on restore:', batchErr.message);
+                }
+            }
+
+            await logActivity(req, 'RESTORE_PRODUCT', { barcode, name: trimmedName, stock });
+            return res.json({ success: true, restored: true, message: 'Product restored successfully' });
         }
 
         // Fresh INSERT — no deleted record found for this barcode
         await pool.query(
             `INSERT INTO products (barcode, name, category, price, stock, stock_levels, cost_price, selling_unit, packaging_unit, conversion_rate, reorder_level, track_batch, track_expiry, tenant_id, created_at) 
              VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)`,
-            [barcode, name, category, price, stockValue, stockLevels, cost_price || 0, selling_unit || 'Unit', packaging_unit || 'Box', conversion_rate || 1, finalReorderLevel, track_batch ?? true, track_expiry ?? false, req.user.tenant_id, entryDate]
+            [barcode, trimmedName, category, price, stockValue, stockLevels, cost_price || 0, selling_unit || 'Unit', packaging_unit || 'Box', conversion_rate || 1, finalReorderLevel, track_batch ?? true, track_expiry ?? false, tenantId, entryDate]
         );
 
         // Insert Batch if stock > 0 (hardware products auto-generate batch if omitted)
         if (stockValue > 0) {
             const finalBatchNum = batch_number || `BATCH-${barcode}-${Date.now().toString().slice(-4)}`;
-            await pool.query(
-                `INSERT INTO product_batches (product_barcode, batch_number, expiry_date, quantity, quantity_available, quantity_received, branch_id, status, created_at)
-                 VALUES ($1, $2, $3, $4, $4, $4, $5, 'Active', $6)
-                 ON CONFLICT (product_barcode, batch_number, branch_id) 
-                 DO UPDATE SET 
-                     expiry_date = EXCLUDED.expiry_date,
-                     quantity = EXCLUDED.quantity,
-                     quantity_available = EXCLUDED.quantity_available,
-                     quantity_received = EXCLUDED.quantity_received,
-                     updated_at = CURRENT_TIMESTAMP`,
-                [barcode, finalBatchNum, expiry_date || null, stockValue, branchId, entryDate]
-            );
+            try {
+                await pool.query(
+                    `INSERT INTO product_batches (product_barcode, batch_number, expiry_date, quantity, quantity_available, quantity_received, branch_id, tenant_id, status, created_at)
+                     VALUES ($1, $2, $3, $4, $4, $4, $5, $6, 'Active', $7)
+                     ON CONFLICT (product_barcode, batch_number, branch_id) 
+                     DO UPDATE SET 
+                         expiry_date = EXCLUDED.expiry_date,
+                         quantity = EXCLUDED.quantity,
+                         quantity_available = EXCLUDED.quantity_available,
+                         quantity_received = EXCLUDED.quantity_received,
+                         updated_at = CURRENT_TIMESTAMP`,
+                    [barcode, finalBatchNum, expiry_date || null, stockValue, branchId, tenantId, entryDate]
+                );
+            } catch (batchErr) {
+                console.error('Batch creation warning on create:', batchErr.message);
+            }
         }
 
-        await logActivity(req, 'CREATE_PRODUCT', { barcode, name, stock });
-        res.json({ success: true });
+        await logActivity(req, 'CREATE_PRODUCT', { barcode, name: trimmedName, stock });
+        res.json({ success: true, message: 'Product added successfully' });
     } catch (err) {
-        if (err.code === '23505' && err.constraint === 'products_barcode_active_idx') {
+        if (err.code === '23505' && (err.constraint === 'products_barcode_active_idx' || (err.message && err.message.includes('products_barcode_active_idx')))) {
             return res.status(409).json({ message: `A product named "${name}" with barcode "${barcode}" already exists. Use a different barcode/name combination or edit the existing product.` });
         }
-        console.error(err);
+        console.error('Error adding product:', err);
         res.status(500).json({ message: 'Error adding product' });
     }
 });
@@ -3438,27 +3469,45 @@ app.get('/api/categories', authenticateToken, async (req, res) => {
 
 app.post('/api/categories', authenticateToken, async (req, res) => {
     const { name, description } = req.body;
-    const branchId = req.user.store_id;
+    if (!name || !name.trim()) {
+        return res.status(400).json({ message: 'Category name is required' });
+    }
+    const trimmedName = name.trim();
+    const branchId = req.user.store_id || null;
+    const tenantId = req.user.tenant_id || 1;
     try {
-        // Restore if soft-deleted category with same name exists in this branch
+        // Restore if soft-deleted category with same name exists in this branch/tenant
         const deletedRes = await pool.query(
-            'SELECT id FROM categories WHERE name = $1 AND branch_id = $2 AND tenant_id = $3 AND deleted_at IS NOT NULL LIMIT 1',
-            [name, branchId, req.user.tenant_id]
+            'SELECT id FROM categories WHERE LOWER(name) = LOWER($1) AND (branch_id IS NOT DISTINCT FROM $2) AND tenant_id = $3 AND deleted_at IS NOT NULL LIMIT 1',
+            [trimmedName, branchId, tenantId]
         );
         if (deletedRes.rows.length > 0) {
             await pool.query(
-                'UPDATE categories SET description = $1, deleted_at = NULL WHERE id = $2 AND tenant_id = $3',
-                [description, deletedRes.rows[0].id, req.user.tenant_id]
+                'UPDATE categories SET name = $1, description = $2, deleted_at = NULL WHERE id = $3 AND tenant_id = $4',
+                [trimmedName, description || '', deletedRes.rows[0].id, tenantId]
             );
-            await logActivity(req, 'RESTORE_CATEGORY', { name, branchId });
-            return res.json({ success: true, restored: true });
+            await logActivity(req, 'RESTORE_CATEGORY', { name: trimmedName, branchId });
+            return res.json({ success: true, restored: true, message: `Category "${trimmedName}" restored successfully.` });
         }
-        await pool.query('INSERT INTO categories (name, description, branch_id, tenant_id) VALUES ($1, $2, $3, $4)', [name, description, branchId, req.user.tenant_id]);
-        await logActivity(req, 'CREATE_CATEGORY', { name, branchId });
-        res.json({ success: true });
+
+        // Check if an active category with the exact same name already exists
+        const existingRes = await pool.query(
+            'SELECT id FROM categories WHERE LOWER(name) = LOWER($1) AND (branch_id IS NOT DISTINCT FROM $2) AND tenant_id = $3 AND deleted_at IS NULL LIMIT 1',
+            [trimmedName, branchId, tenantId]
+        );
+        if (existingRes.rows.length > 0) {
+            return res.json({ success: true, existing: true, message: `Category "${trimmedName}" already exists.` });
+        }
+
+        await pool.query('INSERT INTO categories (name, description, branch_id, tenant_id) VALUES ($1, $2, $3, $4)', [trimmedName, description || '', branchId, tenantId]);
+        await logActivity(req, 'CREATE_CATEGORY', { name: trimmedName, branchId });
+        res.json({ success: true, message: 'Category added successfully.' });
     } catch (err) {
-        if (err.code === '23505') return res.status(409).json({ message: `Category "${name}" already exists.` });
-        console.error(err); res.status(500).json({ message: 'Error creating category' });
+        if (err.code === '23505') {
+            return res.json({ success: true, existing: true, message: `Category "${trimmedName}" already exists.` });
+        }
+        console.error('Error creating category:', err);
+        res.status(500).json({ message: 'Error creating category' });
     }
 });
 
@@ -3504,28 +3553,36 @@ app.get('/api/suppliers', authenticateToken, async (req, res) => {
 
 app.post('/api/suppliers', authenticateToken, async (req, res) => {
     const { name, contact, phone, email, address } = req.body;
-    const branchId = req.user.store_id;
+    if (!name || !name.trim()) {
+        return res.status(400).json({ message: 'Supplier name is required' });
+    }
+    const trimmedName = name.trim();
+    const branchId = req.user.store_id || null;
+    const tenantId = req.user.tenant_id || 1;
     try {
-        // Restore if soft-deleted supplier with same name exists in this branch
+        // Restore if soft-deleted supplier with same name exists in this branch/tenant
         const deletedRes = await pool.query(
-            'SELECT id FROM suppliers WHERE name = $1 AND branch_id = $2 AND tenant_id = $3 AND deleted_at IS NOT NULL LIMIT 1',
-            [name, branchId, req.user.tenant_id]
+            'SELECT id FROM suppliers WHERE LOWER(name) = LOWER($1) AND (branch_id IS NOT DISTINCT FROM $2) AND tenant_id = $3 AND deleted_at IS NOT NULL LIMIT 1',
+            [trimmedName, branchId, tenantId]
         );
         if (deletedRes.rows.length > 0) {
             await pool.query(
-                'UPDATE suppliers SET contact_person=$1, phone=$2, email=$3, address=$4, deleted_at=NULL WHERE id=$5 AND tenant_id=$6',
-                [contact, phone, email, address, deletedRes.rows[0].id, req.user.tenant_id]
+                'UPDATE suppliers SET name=$1, contact_person=$2, phone=$3, email=$4, address=$5, deleted_at=NULL WHERE id=$6 AND tenant_id=$7',
+                [trimmedName, contact || '', phone || '', email || '', address || '', deletedRes.rows[0].id, tenantId]
             );
-            await logActivity(req, 'RESTORE_SUPPLIER', { name, branchId });
-            return res.json({ success: true, restored: true });
+            await logActivity(req, 'RESTORE_SUPPLIER', { name: trimmedName, branchId });
+            return res.json({ success: true, restored: true, message: `Supplier "${trimmedName}" restored successfully.` });
         }
         await pool.query(
             'INSERT INTO suppliers (name, contact_person, phone, email, address, branch_id, tenant_id) VALUES ($1, $2, $3, $4, $5, $6, $7)',
-            [name, contact, phone, email, address, branchId, req.user.tenant_id]
+            [trimmedName, contact || '', phone || '', email || '', address || '', branchId, tenantId]
         );
-        await logActivity(req, 'CREATE_SUPPLIER', { name, branchId });
-        res.json({ success: true });
-    } catch (err) { res.status(500).json({ message: 'Error adding supplier' }); }
+        await logActivity(req, 'CREATE_SUPPLIER', { name: trimmedName, branchId });
+        res.json({ success: true, message: 'Supplier added successfully.' });
+    } catch (err) {
+        console.error('Error adding supplier:', err);
+        res.status(500).json({ message: 'Error adding supplier' });
+    }
 });
 
 app.put('/api/suppliers/:id', authenticateToken, async (req, res) => {

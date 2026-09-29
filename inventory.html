@@ -2699,6 +2699,9 @@
 
         async function saveProduct(e) {
             e.preventDefault();
+            const submitBtn = e.target.querySelector('button[type="submit"]') || document.querySelector('#productForm .btn-save:not(#btnUploadBulk)');
+            const originalBtnText = submitBtn ? submitBtn.innerHTML : 'Save Product';
+
             const id = document.getElementById('pId').value;
             let barcode = document.getElementById('pBarcode').value.trim();
             if (!barcode) {
@@ -2741,8 +2744,8 @@
                 barcode: barcode,
                 name: document.getElementById('pName').value.trim(),
                 category: document.getElementById('pCategory').value,
-                price: parseFloat(document.getElementById('pPrice').value),
-                stock: inputStock, // Note: Backend should handle total stock calculation if needed
+                price: parseFloat(document.getElementById('pPrice').value) || 0,
+                stock: inputStock,
                 cost_price: parseFloat(document.getElementById('pCostPrice').value) || 0,
                 selling_unit: (document.getElementById('pSellingUnit') && document.getElementById('pSellingUnit').value) || 'Unit',
                 packaging_unit: (document.getElementById('pPackagingUnit') && document.getElementById('pPackagingUnit').value) || 'Box',
@@ -2755,6 +2758,14 @@
                 batch_number: document.getElementById('pBatchNumber').value.trim(),
                 expiry_date: document.getElementById('pExpiryDate').value || null
             };
+
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+            }
+
+            let savedSuccessfully = false;
+            let successMessage = "Product saved successfully.";
 
             try {
                 const exists = !!id;
@@ -2771,35 +2782,54 @@
                     body: JSON.stringify(newProduct)
                 });
 
+                const data = await res.json().catch(() => ({}));
+
                 if (!res.ok) {
-                    const errData = await res.json().catch(() => ({}));
-                    throw new Error(errData.message || 'Failed to save');
+                    throw new Error(data.message || 'Failed to save product');
                 }
                 
+                if (data.message) successMessage = data.message;
+                savedSuccessfully = true;
+
                 // If batch number is provided, create/update batch record
                 if (newProduct.batch_number) {
-                    await fetch('/api/batches', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${token}`
-                        },
-                        body: JSON.stringify({
-                            product_barcode: newProduct.barcode,
-                            batch_number: newProduct.batch_number,
-                            expiry_date: newProduct.expiry_date || null,
-                            quantity: inputStock,
-                            quantity_available: inputStock
-                        })
-                    });
+                    try {
+                        await fetch('/api/batches', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${token}`
+                            },
+                            body: JSON.stringify({
+                                product_barcode: newProduct.barcode,
+                                batch_number: newProduct.batch_number,
+                                expiry_date: newProduct.expiry_date || null,
+                                quantity: inputStock,
+                                quantity_available: inputStock
+                            })
+                        });
+                    } catch (batchErr) {
+                        console.warn('Batch record creation notice:', batchErr);
+                    }
                 }
-                
-                showNotification("Product saved successfully.", "success");
-                closeModal();
-                loadInventory();
             } catch (err) {
-                console.error(err);
+                console.error('Error saving product:', err);
                 showNotification(err.message || "Error saving product", "error");
+            } finally {
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalBtnText;
+                }
+            }
+
+            if (savedSuccessfully) {
+                showNotification(successMessage, "success");
+                closeModal();
+                try {
+                    await loadInventory();
+                } catch (loadErr) {
+                    console.error('Error reloading inventory:', loadErr);
+                }
             }
         }
 
@@ -3161,16 +3191,32 @@
 
         async function saveSupplier(e) {
             e.preventDefault();
+            const submitBtn = e.target.querySelector('button[type="submit"]') || document.querySelector('#supplierModal .btn-save');
+            const originalBtnText = submitBtn ? submitBtn.innerHTML : 'Save Supplier';
+
             const idInput = document.getElementById('supId').value;
             const isEdit = idInput !== '';
             
             const supplierData = {
-                name: document.getElementById('supName').value,
-                contact: document.getElementById('supContact').value,
-                phone: document.getElementById('supPhone').value,
-                email: document.getElementById('supEmail').value,
-                address: document.getElementById('supAddress').value
+                name: document.getElementById('supName').value.trim(),
+                contact: document.getElementById('supContact').value.trim(),
+                phone: document.getElementById('supPhone').value.trim(),
+                email: document.getElementById('supEmail').value.trim(),
+                address: document.getElementById('supAddress').value.trim()
             };
+
+            if (!supplierData.name) {
+                showNotification("Please enter a supplier name", "error");
+                return;
+            }
+
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+            }
+
+            let savedSuccessfully = false;
+            let successMessage = isEdit ? "Supplier updated successfully" : "Supplier added successfully";
 
             try {
                 const token = localStorage.getItem('authToken');
@@ -3191,16 +3237,32 @@
                     body: JSON.stringify(supplierData)
                 });
 
+                const data = await res.json().catch(() => ({}));
+
                 if (res.ok) {
-                    showNotification(isEdit ? "Supplier updated successfully" : "Supplier added successfully", "success");
-                    document.getElementById('supplierModal').classList.remove('active');
-                    loadSuppliers();
+                    if (data.message) successMessage = data.message;
+                    savedSuccessfully = true;
                 } else {
-                    const data = await res.json();
                     showNotification(data.message || "Failed to save supplier", "error");
                 }
             } catch (err) {
+                console.error('Error saving supplier:', err);
                 showNotification("Network error saving supplier", "error");
+            } finally {
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalBtnText;
+                }
+            }
+
+            if (savedSuccessfully) {
+                showNotification(successMessage, "success");
+                document.getElementById('supplierModal').classList.remove('active');
+                try {
+                    await loadSuppliers();
+                } catch (loadErr) {
+                    console.error('Error reloading suppliers:', loadErr);
+                }
             }
         }
 
@@ -4371,11 +4433,27 @@
 
         async function saveCategory(e) {
             e.preventDefault();
-            const name = document.getElementById('catName').value;
-            const description = document.getElementById('catDesc').value;
+            const submitBtn = e.target.querySelector('button[type="submit"]') || document.querySelector('#categoryModal .btn-save');
+            const originalBtnText = submitBtn ? submitBtn.innerHTML : 'Save';
 
-            const token = localStorage.getItem('authToken');
+            const name = document.getElementById('catName').value.trim();
+            const description = document.getElementById('catDesc').value.trim();
+
+            if (!name) {
+                showNotification("Please enter a category name", "error");
+                return;
+            }
+
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+            }
+
+            let savedSuccessfully = false;
+            let successMessage = "Category saved successfully";
+
             try {
+                const token = localStorage.getItem('authToken');
                 const res = await fetch('/api/categories', {
                     method: 'POST',
                     headers: { 
@@ -4384,12 +4462,36 @@
                     },
                     body: JSON.stringify({ name, description })
                 });
+
+                const data = await res.json().catch(() => ({}));
+
                 if (res.ok) {
-                    document.getElementById('categoryModal').classList.remove('active');
-                    loadCategories();
-                    showNotification("Category saved", "success");
-                } else showNotification("Error saving category", "error");
-            } catch (e) { console.error(e); }
+                    if (data.message) successMessage = data.message;
+                    savedSuccessfully = true;
+                } else {
+                    showNotification(data.message || "Error saving category", "error");
+                }
+            } catch (err) {
+                console.error('Error saving category:', err);
+                showNotification("Error saving category. Please try again.", "error");
+            } finally {
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalBtnText;
+                }
+            }
+
+            if (savedSuccessfully) {
+                document.getElementById('categoryModal').classList.remove('active');
+                document.getElementById('catName').value = '';
+                document.getElementById('catDesc').value = '';
+                showNotification(successMessage, "success");
+                try {
+                    await loadCategories();
+                } catch (loadErr) {
+                    console.error('Error reloading categories:', loadErr);
+                }
+            }
         }
 
         let categoryToDelete = null;
